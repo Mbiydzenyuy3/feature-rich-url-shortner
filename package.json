@@ -1,13 +1,14 @@
 {
-  "name": "backend",
+  "name": "feature rich url shortener api",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "www",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Leila",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.2",

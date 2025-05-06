@@ -3,50 +3,52 @@
 /**
  * Module dependencies.
  */
-
-var app = require('../app');
-var debug = require('debug')('feature-rich-url-shortener-api:server');
-var http = require('http');
+import dotenv from "dotenv";
+dotenv.config();
+import app from "../app.js";
+import { logInfo, logError, logDebug } from "../src/utils/logger.js";
+import { connectToDb, initializeDbSchema } from "../src/config/db.js";
+import debug from "debug";
+import http from "http";
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+const Port = normalizePort(process.env.PORT || "3000");
+app.set("port", Port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+const server = http.createServer(app);
 
 /**
  * Normalize a port into a number, string, or false.
  */
 
+const dbg = debug("feature-rich-url-shortener-api:server");
+
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  const port = parseInt(val, 10);
+  return isNaN(port) ? val : port >= 0 ? port : false;
+}
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
+["SIGNUP", "SIGINT", "SIGTERM"].forEach((signal) => {
+  process.on(signal, gracefulShutdown);
+});
+
+async function gracefulShutdown(signal) {
+  logInfo(`Received ${signal} Shutting down...`);
+  try {
+    await server.close();
+    logInfo("Server closed gracefully. Exiting...");
+    process.exit(0);
+  } catch (error) {
+    logError("Error closing server:", error);
+    process.exit(1);
   }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
 }
 
 /**
@@ -54,22 +56,20 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
+  if (error.syscall !== "listen") {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  const bind = typeof Port === "string" ? "Pipe " + Port : "Port " + Port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
       process.exit(1);
       break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
       process.exit(1);
       break;
     default:
@@ -82,9 +82,28 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  const addr = server.address();
+  const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  logDebug("Listening on " + bind);
 }
+
+async function startServer() {
+  try {
+    logInfo(`Attempting to start server on port ${Port}`);
+    await connectToDb();
+    await initializeDbSchema();
+
+    /**
+     * Listen on provided port, on all network interfaces.
+     */
+
+    server.listen(Port);
+    server.on("error", onError);
+    server.on("listening", onListening);
+  } catch (error) {
+    logError("Server startup failed:", error);
+    process.exit(1);
+  }
+}
+
+startServer;
