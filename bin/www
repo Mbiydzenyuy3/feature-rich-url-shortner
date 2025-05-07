@@ -5,18 +5,17 @@
  */
 import dotenv from "dotenv";
 dotenv.config();
+import debug from "debug";
+import http from "node:http";
 import app from "../app.js";
 import { logInfo, logError, logDebug } from "../src/utils/logger.js";
 import { connectToDb, initializeDbSchema } from "../src/config/db.js";
-import debug from "debug";
-import http from "http";
 
 /**
  * Get port from environment and store in Express.
  */
 
-const Port = normalizePort(process.env.PORT || "3000");
-app.set("port", Port);
+const PORT = normalizePort(process.env.PORT || "3000");
 
 /**
  * Create HTTP server.
@@ -60,18 +59,17 @@ function onError(error) {
     throw error;
   }
 
-  const bind = typeof Port === "string" ? "Pipe " + Port : "Port " + Port;
+  const bind = typeof PORT === "string" ? `Pipe ${PORT}` : `Port ${PORT}`;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case "EACCES":
-      console.error(bind + " requires elevated privileges");
+      logError(`${bind} requires elevated privileges`);
       process.exit(1);
-      break;
     case "EADDRINUSE":
-      console.error(bind + " is already in use");
+      logError(`${bind} is already in use`);
+      logInfo("Trying next available port...");
       process.exit(1);
-      break;
     default:
       throw error;
   }
@@ -83,21 +81,20 @@ function onError(error) {
 
 function onListening() {
   const addr = server.address();
-  const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-  logDebug("Listening on " + bind);
+  const bind = typeof addr === "string" ? `pipe ${addr}` : `port ${addr.port}`;
+  logDebug(`Listening on ${bind}`);
 }
 
 async function startServer() {
   try {
-    logInfo(`Attempting to start server on port ${Port}`);
+    logInfo(`Attempting to start server on port ${PORT}`);
     await connectToDb();
     await initializeDbSchema();
-
     /**
      * Listen on provided port, on all network interfaces.
      */
 
-    server.listen(Port);
+    server.listen(PORT);
     server.on("error", onError);
     server.on("listening", onListening);
   } catch (error) {
@@ -106,4 +103,4 @@ async function startServer() {
   }
 }
 
-startServer;
+startServer();

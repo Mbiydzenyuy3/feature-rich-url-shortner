@@ -2,7 +2,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import pg from "pg";
-import { logInfo, logError, logDebug } from "../utils/logger";
+import { logInfo, logError, logDebug } from "../utils/logger.js";
 
 const { Pool } = pg;
 
@@ -88,7 +88,7 @@ const initializeDbSchema = async () => {
     await client.query("BEGIN");
 
     //Enable pgcrypto
-    await client.query("CREATE EXTENSION IF NOT EXISTS pgcryto");
+    await client.query("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
 
     //USERS TABLE
     await client.query(`
@@ -100,12 +100,12 @@ const initializeDbSchema = async () => {
         created_at TIMESTAMP DEFAULT NOW()
       );
       `);
-    
+
     //urls
     await client.query(`
       CREATE TABLE IF NOT EXISTS urls (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
+        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
         long_url TEXT,
         short_code TEXT UNIQUE,
         click_count INT DEFAULT 0,
@@ -114,11 +114,44 @@ const initializeDbSchema = async () => {
       );
     `);
 
+    //Indexes
+    await client.query(
+      "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)"
+    );
+
+    await client.query("CREATE INDEX IF NOT EXISTS idx_urls_id ON urls(id)");
+
+    // TRIGGERS
+    await client.query(`
+      CREATE OR REPLACE FUNCTION       update_updated_at_column()
+       RETURNS TRIGGER AS $$
+      BEGIN
+       NEW.updated_at = NOW();
+       RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_users_updated_at') THEN
+          CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_urls_updated_at') THEN
+          CREATE TRIGGER update_urls_updated_at BEFORE UPDATE ON urls FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        END IF;
+      END $$;
+    `);
+
+    logDebug("All Triggers checked and created");
+
+    await client.query("COMMIT");
+    logInfo("🎉 DB schema initialized successfully!");
     // 🔐 Prevent concurrent schema initialization
-  } catch (error) {
+  } catch (err) {
     await client.query("ROLLBACK");
-    logError("❌ Error while initializing the schema", error);
-    throw error;
+    logError("❌ Error while initializing the schema", err);
+    throw err;
   } finally {
     await client.query("SELECT pg_advisory_unlock(20250424)");
     client.release();
@@ -141,4 +174,4 @@ const query = async (text, params) => {
   }
 };
 
-export { pool, connectToDb, initializeDbSchema };
+export { pool, connectToDb, query, initializeDbSchema };

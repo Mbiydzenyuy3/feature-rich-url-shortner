@@ -36,7 +36,7 @@ export async function register(req, res, next) {
     const userInsertResult = await query(
       `INSERT INTO users (name, email, password)
        VALUES ($1, $2, $3)
-       RETURNING user_id`,
+       RETURNING id`,
       [name, email, hashedPassword]
     );
 
@@ -48,6 +48,7 @@ export async function register(req, res, next) {
       {
         id: userId,
         email,
+        name,
       },
       process.env.JWT_SECRET,
       { expiresIn: "3h" }
@@ -60,6 +61,7 @@ export async function register(req, res, next) {
       data: {
         id: userId,
         email,
+        name,
       },
     });
   } catch (err) {
@@ -101,6 +103,7 @@ export async function login(req, res, next) {
     const tokenPayload = {
       id: user.id,
       email: user.email,
+      name: user.name,
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
@@ -116,6 +119,7 @@ export async function login(req, res, next) {
       data: {
         id: user.id,
         email: user.email,
+        name: user.name,
       },
     });
   } catch (err) {

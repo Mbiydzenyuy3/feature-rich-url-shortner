@@ -1,56 +1,56 @@
 import jwt from "jsonwebtoken";
-import { logError, logInfo, logDebug } from "../utils/logger.js";
 import { query } from "../config/db.js";
+import { logInfo, logError, logDebug } from "../utils/logger.js";
 
 const authMiddleware = async (req, res, next) => {
-  const authHeader = req.header("Authorization");
-  const token =
-    authHeader && authHeader.startsWith("Bearer ")
+  try {
+    const authHeader = req.header("Authorization");
+
+    // Extract token from header
+    const token = authHeader?.startsWith("Bearer ")
       ? authHeader.split(" ")[1]
       : null;
 
-  if (!token) {
-    logInfo("Auth middleware: No token provided.");
-    return res
-      .status(401)
-      .json({ message: "No token provided, authorization denied." });
-  }
+    if (!token) {
+      logInfo("Auth middleware: No token provided.");
+      return res.status(401).json({ message: "Authorization token missing." });
+    }
 
-  try {
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!decoded.sub) {
+    if (!decoded || typeof decoded !== "object") {
+      logInfo("Auth middleware: Decoded token is invalid or malformed.");
+      return res.status(401).json({ message: "Invalid token structure." });
+    }
+
+    // Extract user ID from token payload
+    const userId = decoded.sub || decoded.id
+
+    if (!userId) {
+      logInfo("Auth middleware: Token payload missing user identifier.");
       return res.status(401).json({ message: "Invalid token payload." });
     }
 
-    // Fetch user role from DB
+    logDebug("Auth middleware: Decoded JWT payload", decoded);
+
+    // Check that the user exists
     const result = await query(
-      `SELECT u.user_id,
-          CASE
-            WHEN p.provider_id IS NOT NULL THEN 'provider'
-            ELSE 'client'
-          END AS user_type,
-            p.provider_id
-          FROM users u
-          LEFT JOIN providers p ON p.user_id = u.user_id
-          WHERE u.user_id = $1
-          LIMIT 1`,
-      [decoded.sub]
+      "SELECT id, email FROM users WHERE id = $1 LIMIT 1",
+      [userId]
     );
 
     if (result.rowCount === 0) {
       return res.status(401).json({ message: "User not found." });
     }
 
+    // Attach user info to request
     req.user = {
-      service_id: result.rows[0].provider_id,
-      user_type: result.rows[0].user_type,
-      user_id: decoded.sub,
+      id: result.rows[0].id,
+      email: result.rows[0].email,
     };
 
-    logDebug(
-      `Auth middleware: Token verified for user ID ${req.user.id} with role ${req.user.user_type}`
-    );
+    logDebug(`Auth middleware: Authenticated user ID ${req.user.id}`);
 
     next();
   } catch (error) {
@@ -61,11 +61,11 @@ const authMiddleware = async (req, res, next) => {
     }
 
     if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Token is not valid." });
+      return res.status(401).json({ message: "Invalid token." });
     }
 
-    return res.status(error.status || 500).json({
-      message: error.message || "Server error during token verification.",
+    return res.status(500).json({
+      message: "Server error during token verification.",
     });
   }
 };

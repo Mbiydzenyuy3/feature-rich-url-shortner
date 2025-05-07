@@ -1,16 +1,18 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
-import path from "path";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import morgan from "morgan";
 import { fileURLToPath } from "node:url";
 import path, { dirname } from "node:path";
 
-// import swaggerUi from "swagger-ui-express";
-// import swaggerSpec from "./swaggerConfig.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./swaggerConfig.js";
 
 import indexRouter from "./src/routes/index.js";
 import authRouter from "./src/routes/user.js";
+import urlRouter from "./src/routes/url.js"
 
 const app = express();
 
@@ -26,9 +28,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-
 //API Routes
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
+app.use("/api", urlRouter)
+
+// Swagger Documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+//error message if anything goes wrong
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 export default app;
