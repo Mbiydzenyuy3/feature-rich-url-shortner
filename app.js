@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import path, { dirname } from "node:path";
 
 import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "../app/swaggerConfig.js";
+import swaggerSpec from "./swaggerConfig.js";
 import errorHandler from "./src/middlewares/errorHandler-middleware.js";
 
 import indexRouter from "./src/routes/index.js";
