@@ -32,12 +32,12 @@ const createShortUrl = async (req, res) => {
 };
 
 const getUserUrls = async (req, res) => {
-  const userId = req.user?.id;
+  const userId = req.user.id;
 
   try {
     const result = await pool.query(
       `
-      SELECT short_code, long_url, created_at, expire_at, click_count FROM urls WHERE id = $1 ORDER BY created_at DESC 
+      SELECT short_code, long_url, created_at, expire_at, click_count FROM urls WHERE user_id = $1 ORDER BY created_at DESC 
     `,
       [userId]
     );
@@ -51,7 +51,7 @@ const getUserUrls = async (req, res) => {
 
 const getUrlStats = async (req, res) => {
   const { shortCode } = req.params;
-  const userId = req.user?.id;
+  const userId = req.user.id;
 
   try {
     const result = await pool.query(

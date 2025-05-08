@@ -18,6 +18,6 @@ router.post(
 );
 
 router.get("/my-urls", authMiddleware, getUserUrls);
-router.get("/shorten/:shortCode/stats", authMiddleware, getUrlStats);
+router.get("/:shortCode/stats", authMiddleware, getUrlStats);
 
 export default router;
