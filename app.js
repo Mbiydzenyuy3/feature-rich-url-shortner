@@ -9,10 +9,12 @@ import path, { dirname } from "node:path";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swaggerConfig.js";
+import errorHandler from "./src/middlewares/errorHandler-middleware.js";
 
 import indexRouter from "./src/routes/index.js";
 import authRouter from "./src/routes/user.js";
 import urlRouter from "./src/routes/url.js"
+import redirectRouter from "./src/routes/redirect.js"
 
 const app = express();
 
@@ -30,8 +32,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //API Routes
 app.use("/", indexRouter);
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 app.use("/api", urlRouter)
+app.use("/", redirectRouter);
 
 // Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -40,5 +43,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
+
+app.use(errorHandler);
 
 export default app;

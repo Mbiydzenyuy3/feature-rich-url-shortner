@@ -6,12 +6,12 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Appointment Booking API",
+      title: "Feature-Rich URL Shortener API",
       version: "1.0.0",
       description:
-        "API documentation for the Appointment Booking system, including user authentication, provider management, time slots, and appointment booking/cancellation.",
+        "A secure and feature-rich backend API for URL shortening with authentication, expiration, analytics, and management functionality.",
       contact: {
-        name: "API Support",
+        name: "Developer",
         email: "support@example.com",
       },
       license: {
@@ -22,7 +22,7 @@ const swaggerOptions = {
     servers: [
       {
         url: `http://localhost:${PORT}/api`,
-        description: "Development Server",
+        description: "Local development server",
       },
     ],
     components: {
@@ -31,73 +31,76 @@ const swaggerOptions = {
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
-          description: "JWT Authorization header using the Bearer scheme.",
         },
       },
       schemas: {
         User: {
           type: "object",
           properties: {
-            id: {
-              type: "string",
-              format: "uuid",
-              description: "Unique identifier of the user",
-            },
-            name: { type: "string", description: "Full name of the user" },
-            email: {
-              type: "string",
-              format: "email",
-              description: "Email address of the user",
-            },
-            createdAt: {
-              type: "string",
-              format: "date-time",
-              description: "Date and time when the user was created",
-            },
+            id: { type: "string", format: "uuid" },
+            username: { type: "string" },
+            createdAt: { type: "string", format: "date-time" },
           },
-          required: ["id", "name", "email"],
         },
-        url: {
+        RegisterInput: {
+          type: "object",
+          required: ["username", "password"],
+          properties: {
+            username: { type: "string", example: "john_doe" },
+            password: { type: "string", example: "securePassword123" },
+          },
+        },
+        LoginInput: {
+          type: "object",
+          required: ["username", "password"],
+          properties: {
+            username: { type: "string" },
+            password: { type: "string" },
+          },
+        },
+        AuthResponse: {
           type: "object",
           properties: {
-            id: {
-              type: "string",
-              format: "uuid",
-              description: "Unique identifier of the provider",
-            },
-            name: { type: "string", description: "Full name of the provider" },
-            email: {
-              type: "string",
-              format: "email",
-              description: "Email address of the provider",
-            },
-            long_url: {
-              type: "string",
-              description:"",
-            }, 
+            token: { type: "string", description: "JWT token" },
           },
-          required: ["id", "name", "email"],
         },
-        short_code: {
+        ShortURL: {
           type: "object",
           properties: {
-            id: {
-              type: "string",
-              format: "uuid",
-              description: "",
-            },
+            id: { type: "string", format: "uuid" },
+            shortcode: { type: "string", example: "abc123" },
+            longurl: { type: "string", format: "uri" },
+            createdAt: { type: "string", format: "date-time" },
+            expiresAt: { type: "string", format: "date-time", nullable: true },
+            clicks: { type: "integer", example: 5 },
           },
-          required: ["id", "day", "startTime", "endTime", "serviceProviderId"],
         },
-
+        ShortenRequest: {
+          type: "object",
+          required: ["longUrl"],
+          properties: {
+            longUrl: { type: "string", format: "uri" },
+            customCode: { type: "string", example: "my-custom" },
+            expiresAt: { type: "string", format: "date-time" },
+          },
+        },
+        ShortenResponse: {
+          type: "object",
+          properties: {
+            shortUrl: {
+              type: "string",
+              example: "https://yourdomain.com/s/abc123",
+            },
+            shortcode: { type: "string", example: "abc123" },
+          },
+        },
         Error: {
           type: "object",
           properties: {
-            message: { type: "string", example: "Error message description" },
+            message: { type: "string" },
             errors: {
               type: "array",
               items: { type: "string" },
-              example: ['"providerId" is not allowed'],
             },
           },
         },
@@ -105,9 +108,8 @@ const swaggerOptions = {
     },
     security: [{ bearerAuth: [] }],
   },
-  apis: ["./src/routes/*.js"], // Path to your API routes
+  apis: ["./src/routes/*.js"], // Adjust to your route file locations
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
 export default swaggerSpec;
