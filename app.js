@@ -33,8 +33,8 @@ app.use(express.static(path.join(__dirname, "public")));
 //API Routes
 app.use("/", indexRouter);
 app.use("/api/auth", authRouter);
-app.use("/api", urlRouter)
-app.use("/", redirectRouter);
+app.use("/api/shorten", urlRouter)
+app.use("/redirect", redirectRouter);
 
 // Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

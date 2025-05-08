@@ -89,7 +89,7 @@ Auth	            POST	     /api/auth/register	              Register a new user
 Auth	            POST	     /api/auth/login	                Login and receive JWT token
 Shorten	          POST	     /api/shorten	                    Create a short URL (auth required)
 Redirect	        GET	       /s/:shortCode	                  Redirect to long URL (public)
-User URLs	        GET	       /api/my-urls	                    Get URLs created by current user
+User URLs	        GET	       /api/shorten/my-urls	                    Get URLs created by current user
 Stats ⚙️	         GET	      /api/shorten/:shortCode/stats	   (Optional) Get stats for a short URL
 
 ## 🔒 Authentication

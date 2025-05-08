@@ -1,8 +1,9 @@
 import express from "express";
 import { getRedirectUrl } from "../controllers/redirecturl-controller.js";
+// import authMiddleware from "../middlewares/user-auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/shortener/:shortCode", getRedirectUrl);
+router.get("/:shortCode", getRedirectUrl);
 
-export default router
+export default router;

@@ -94,7 +94,7 @@ const initializeDbSchema = async () => {
     await client.query(`
       CREATE TABLE IF NOT EXISTS users(
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR (50) NOT NULL,
+        username VARCHAR (50) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
@@ -148,10 +148,10 @@ const initializeDbSchema = async () => {
     await client.query("COMMIT");
     logInfo("🎉 DB schema initialized successfully!");
     // 🔐 Prevent concurrent schema initialization
-  } catch (err) {
+  } catch (error) {
     await client.query("ROLLBACK");
-    logError("❌ Error while initializing the schema", err);
-    throw err;
+    logError("❌ Error while initializing the schema", error);
+    throw error;
   } finally {
     await client.query("SELECT pg_advisory_unlock(20250424)");
     client.release();
@@ -168,8 +168,8 @@ const query = async (text, params) => {
       logDebug(`🧪 Query: ${text.slice(0, 80)}... | ${duration}ms`);
     }
     return result;
-  } catch (err) {
-    logError(`❌ Query failed: ${text.slice(0, 80)}...`, err);
+  } catch (error) {
+    logError(`❌ Query failed: ${text.slice(0, 80)}...`, error);
     throw err;
   }
 };

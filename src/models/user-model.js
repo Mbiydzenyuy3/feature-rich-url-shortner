@@ -6,16 +6,16 @@ import { query } from "../config/db.js";
 /**
  * Create a new user in the database
  */
-export const UserModel = async ({ name, email, password }) => {
+export const UserModel = async ({ username, email, password }) => {
   try {
     // Hash the password before storing it
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const { rows } = await query(
-      `INSERT INTO users (name, email, password)
+      `INSERT INTO users (username, email, password)
        VALUES ($1, $2, $3)
-       RETURNING id, name, email`,
-      [name, email, hashedPassword]
+       RETURNING id, username, email`,
+      [username, email, hashedPassword]
     );
     return rows[0]; // Return only necessary fields (excluding password)
   } catch (error) {
@@ -31,7 +31,7 @@ export const UserModel = async ({ name, email, password }) => {
 export const findByEmail = async (email) => {
   try {
     const { rows } = await query(
-      `SELECT id, name, email, password FROM users WHERE email = $1 LIMIT 1`,
+      `SELECT id, username, email, password FROM users WHERE email = $1 LIMIT 1`,
       [email]
     );
     return rows[0] ?? null;

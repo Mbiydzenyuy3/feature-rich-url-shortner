@@ -7,9 +7,9 @@ import { query } from "../config/db.js";
 
 // Controller function for user registration
 export async function register(req, res, next) {
-  const { name, email, password } = req.body;
+  const { username, email, password } = req.body;
 
-  if (!name || !email || !password) {
+  if (!username || !email || !password) {
     return res.status(400).json({
       success: false,
       message: "Missing required fields.",
@@ -34,10 +34,10 @@ export async function register(req, res, next) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const userInsertResult = await query(
-      `INSERT INTO users (name, email, password)
+      `INSERT INTO users (username, email, password)
        VALUES ($1, $2, $3)
        RETURNING id`,
-      [name, email, hashedPassword]
+      [username, email, hashedPassword]
     );
 
     const userId = userInsertResult.rows[0].id;
@@ -48,7 +48,7 @@ export async function register(req, res, next) {
       {
         id: userId,
         email,
-        name,
+        username,
       },
       process.env.JWT_SECRET,
       { expiresIn: "3h" }
@@ -57,11 +57,10 @@ export async function register(req, res, next) {
     res.status(201).json({
       success: true,
       message: "User registered successfully.",
-      token,
       data: {
         id: userId,
         email,
-        name,
+        username,
       },
     });
   } catch (err) {
@@ -103,7 +102,7 @@ export async function login(req, res, next) {
     const tokenPayload = {
       id: user.id,
       email: user.email,
-      name: user.name,
+      username: user.username,
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
@@ -119,7 +118,7 @@ export async function login(req, res, next) {
       data: {
         id: user.id,
         email: user.email,
-        name: user.name,
+        username: user.username,
       },
     });
   } catch (err) {

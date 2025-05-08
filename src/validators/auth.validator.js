@@ -12,7 +12,7 @@ export const validate = (schema) => (req, res, next) => {
 
 // Registration schema
 export const registerSchema = Joi.object({
-  name: Joi.string().min(3).max(30).required().messages({
+  username: Joi.string().min(3).max(30).required().messages({
     "string.min": "Name should have at least 3 characters",
     "string.max": "Name should have at most 30 characters",
     "any.required": "Name is required",

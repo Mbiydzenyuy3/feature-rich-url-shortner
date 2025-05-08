@@ -44,9 +44,10 @@ const swaggerOptions = {
         },
         RegisterInput: {
           type: "object",
-          required: ["username", "password"],
+          required: ["username", "email", "password"],
           properties: {
             username: { type: "string", example: "john_doe" },
+            email: { type: "string", example: "johndoe@gmail.com" },
             password: { type: "string", example: "securePassword123" },
           },
         },
@@ -54,7 +55,7 @@ const swaggerOptions = {
           type: "object",
           required: ["username", "password"],
           properties: {
-            username: { type: "string" },
+            email: { type: "string" },
             password: { type: "string" },
           },
         },
@@ -62,6 +63,14 @@ const swaggerOptions = {
           type: "object",
           properties: {
             token: { type: "string", description: "JWT token" },
+          },
+        },
+        ShortenRequest: {
+          type: "object",
+          required: ["longUrl"],
+          properties: {
+            longUrl: { type: "string", format: "uri" },
+            expiresAt: { type: "string", format: "date-time" },
           },
         },
         ShortURL: {
@@ -75,15 +84,7 @@ const swaggerOptions = {
             clicks: { type: "integer", example: 5 },
           },
         },
-        ShortenRequest: {
-          type: "object",
-          required: ["longUrl"],
-          properties: {
-            longUrl: { type: "string", format: "uri" },
-            customCode: { type: "string", example: "my-custom" },
-            expiresAt: { type: "string", format: "date-time" },
-          },
-        },
+
         ShortenResponse: {
           type: "object",
           properties: {
