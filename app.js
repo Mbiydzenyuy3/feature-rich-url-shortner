@@ -13,8 +13,8 @@ import errorHandler from "./src/middlewares/errorHandler-middleware.js";
 
 import indexRouter from "./src/routes/index.js";
 import authRouter from "./src/routes/user.js";
-import urlRouter from "./src/routes/url.js"
-import redirectRouter from "./src/routes/redirect.js"
+import urlRouter from "./src/routes/url.js";
+import redirectRouter from "./src/routes/redirect.js";
 
 const app = express();
 
@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //API Routes
 app.use("/", indexRouter);
 app.use("/api/auth", authRouter);
-app.use("/api/shorten", urlRouter)
+app.use("/api/shorten", urlRouter);
 app.use("/redirect", redirectRouter);
 
 // Swagger Documentation

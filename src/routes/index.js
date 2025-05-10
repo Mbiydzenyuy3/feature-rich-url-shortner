@@ -1,9 +1,13 @@
 import express from "express";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const router = express.Router();
 
-/* GET home page. */
-router.get("/", function (req, res, next) {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+router.get("/", function (req, res) {
   res.sendFile(join(__dirname, "../../public/index.html"));
 });
 
