@@ -4,7 +4,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  res.send("USe an API shortener for your long URLs");
+  res.sendFile(join(__dirname, "../../public/index.html"));
 });
 
 export default router;
