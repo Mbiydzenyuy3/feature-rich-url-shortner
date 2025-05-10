@@ -24,7 +24,7 @@ const createShortUrl = async (req, res, next) => {
     //  const shortCode = generateShortCode();
     const generatedShortCode = generateShortCode(6);
     const shortCode = customCode || generatedShortCode;
-    const expiresAt = expireInDays
+    const expireAt = expireInDays
       ? new Date(Date.now() + expireInDays * 24 * 60 * 60 * 1000)
       : null;
 
@@ -36,13 +36,13 @@ const createShortUrl = async (req, res, next) => {
     const shortUrl = `${req.protocol}://${host}/s/${shortCode}`;
 
     const insertUrlInfoQuery = `
-      INSERT INTO urls (long_url, short_code, expires_at, user_id, short_url)
+      INSERT INTO urls (long_url, short_code, expire_at, user_id, short_url)
       VALUES($1, $2, $3, $4, $5)
-      RETURNING created_at, expires_at`;
+      RETURNING created_at, expire_at`;
     const insertUrlInfoResult = await pool.query(insertUrlInfoQuery, [
       longUrl,
       shortCode,
-      expiresAt,
+      expireAt,
       userId,
       shortUrl,
     ]);
@@ -54,12 +54,12 @@ const createShortUrl = async (req, res, next) => {
       shortened_URL: shortUrl,
       original_URL: longUrl,
       created_at: insertUrlInfoResult.rows[0].created_at,
-      expires_at:
+      expire_at:
         insertUrlInfoResult.rows[0].expires_at || "No expiration time",
     });
   } catch (error) {
     logError("Error creating short Url", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error creating short url, double check for wrong field or data" });
   }
 };
 
@@ -82,7 +82,7 @@ const getUserUrls = async (req, res, next) => {
     }
     return res.status(200).json({
       message: "Available urls",
-      urls: result.rows,
+      urls: getUrlsResult.rows,
     });
   } catch (error) {
     logError(`
@@ -98,7 +98,7 @@ const getUrlStats = async (req, res, next) => {
   const userId = req.user.id;
 
   try {
-    const urlStatsQuery = `SELECT id, long_url, click_count, created_at, expires_at, short_code FROM urls WHERE short_code=$1 AND user_id=$2`;
+    const urlStatsQuery = `SELECT id, long_url, click_count, created_at, expire_at, short_code FROM urls WHERE short_code=$1 AND user_id=$2`;
     const urlStatResult = await pool.query(urlStatsQuery, [shortCode, userId]);
 
     if (urlStatResult.rowCount === 0) {
@@ -116,7 +116,7 @@ const getUrlStats = async (req, res, next) => {
       short_url: `${baseUrl}/s/${url.short_code}`,
       clicks: url.clicks,
       createdAt: url.created_at,
-      expiresAt: url.expires_at,
+      expireAt: url.expire_at,
     });
   } catch (err) {
     logError(err);

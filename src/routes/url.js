@@ -17,7 +17,7 @@ router.post(
   createShortUrl
 );
 
-router.get("/get-urls", authMiddleware, getUserUrls);
+router.get("/:get-urls", authMiddleware, getUserUrls);
 router.get("/:shortCode/stats", authMiddleware, getUrlStats);
 
 export default router;

@@ -7,7 +7,7 @@ const getRedirectUrl = async (req, res) => {
   try {
     const result = await pool.query(
       `
-      SELECT id, long_url, expires_at, click_count FROM urls WHERE short_code = $1
+      SELECT id, long_url, expire_at, click_count FROM urls WHERE short_code = $1
     `,
       [shortCode]
     );
@@ -17,9 +17,9 @@ const getRedirectUrl = async (req, res) => {
       return res.status(404).json({ message: "Short url not found" });
     }
 
-    const { long_url, expires_at, click_count, id } = result.rows[0];
+    const { long_url, expire_at, click_count, id } = result.rows[0];
 
-    if (expires_at && new Date() > new Date(expires_at)) {
+    if (expire_at && new Date() > new Date(expire_at)) {
       logDebug(`Short code expired: ${shortCode}`);
       return res
         .status(410)

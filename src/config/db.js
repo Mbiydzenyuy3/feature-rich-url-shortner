@@ -111,7 +111,7 @@ const initializeDbSchema = async () => {
         short_url TEXT,
         click_count INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT NOW(),
-        expires_at TIMESTAMP NULL,
+        expire_at TIMESTAMP NULL,
         updated_at TIMESTAMP DEFAULT now()
       );
     `);
