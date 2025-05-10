@@ -10,7 +10,7 @@ const createShortUrl = async (req, res, next) => {
   try {
     if (customCode) {
       const checkCustomCode = `SELECT * FROM urls WHERE short_code=$1`;
-      const checkCustomCodeResult = await query(checkCustomCode, [customCode]);
+      const checkCustomCodeResult = await pool.query(checkCustomCode, [customCode]);
 
       if (checkCustomCodeResult.rows.length > 0) {
         logError(`Custom code ${customCode} is already in use`);
@@ -39,7 +39,7 @@ const createShortUrl = async (req, res, next) => {
       INSERT INTO urls (long_url, short_code, expires_at, user_id, short_url)
       VALUES($1, $2, $3, $4, $5)
       RETURNING created_at, expires_at`;
-    const insertUrlInfoResult = await query(insertUrlInfoQuery, [
+    const insertUrlInfoResult = await pool.query(insertUrlInfoQuery, [
       longUrl,
       shortCode,
       expiresAt,
@@ -99,7 +99,7 @@ const getUrlStats = async (req, res, next) => {
 
   try {
     const urlStatsQuery = `SELECT id, long_url, click_count, created_at, expires_at, short_code FROM urls WHERE short_code=$1 AND user_id=$2`;
-    const urlStatResult = await query(urlStatsQuery, [shortCode, userId]);
+    const urlStatResult = await pool.query(urlStatsQuery, [shortCode, userId]);
 
     if (urlStatResult.rowCount === 0) {
       return res

@@ -70,6 +70,7 @@ const swaggerOptions = {
           required: ["longUrl"],
           properties: {
             longUrl: { type: "string", format: "uri" },
+            shortCode: {ype: "string", format: "uri"},
             expiresAt: { type: "string", format: "date-time" },
           },
         },
