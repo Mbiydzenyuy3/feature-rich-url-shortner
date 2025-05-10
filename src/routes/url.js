@@ -11,13 +11,13 @@ import { validate } from "../middlewares/validate.middleware.js";
 const router = express.Router();
 
 router.post(
-  "/url-shortener",
+  "/shortener",
   authMiddleware,
   validate(shortenUrlSchema),
   createShortUrl
 );
 
-router.get("/my-urls", authMiddleware, getUserUrls);
+router.get("/get-urls", authMiddleware, getUserUrls);
 router.get("/:shortCode/stats", authMiddleware, getUrlStats);
 
 export default router;

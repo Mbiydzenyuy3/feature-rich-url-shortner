@@ -105,9 +105,10 @@ const initializeDbSchema = async () => {
     await client.query(`
       CREATE TABLE IF NOT EXISTS urls (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-        long_url TEXT,
-        short_code TEXT UNIQUE,
+        short_code VARCHAR(8) UNIQUE NOT NULL,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        long_url VARCHAR(255) NOT NULL,
+        short_url TEXT,
         click_count INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT NOW(),
         expire_at TIMESTAMP NULL
@@ -115,11 +116,22 @@ const initializeDbSchema = async () => {
     `);
 
     //Indexes
-    await client.query(
-      "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)"
-    );
+    await client.query(` 
+      CREATE INDEX IF NOT EXISTS idx_short_urls_user_id ON urls(user_id);
+      `);
+    logInfo("urls table has been created successfully");
 
-    await client.query("CREATE INDEX IF NOT EXISTS idx_urls_id ON urls(id)");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS click_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        url_id UUID REFERENCES urls(id) ON DELETE CASCADE,
+        clicked_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_click_logs_url_id ON click_logs(url_id);
+    `);
 
     // TRIGGERS
     await client.query(`

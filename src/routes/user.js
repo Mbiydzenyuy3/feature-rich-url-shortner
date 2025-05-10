@@ -3,6 +3,7 @@ import express from "express";
 import { validate } from "../middlewares/validate.middleware.js";
 import { registerSchema, loginSchema } from "../validators/auth.validator.js";
 import * as AuthController from "../controllers/user-auth.controller.js";
+import authMiddleware from "../middlewares/user-auth.middleware.js";
 
 const router = express.Router();
 
@@ -15,5 +16,7 @@ router.post("/register", validate(registerSchema), AuthController.register);
 // This route accepts POST requests to '/auth/login'
 // with validation middleware for user input.
 router.post("/login", validate(loginSchema), AuthController.login);
+
+router.post("/logout", authMiddleware, AuthController.logoutUser);
 
 export default router;

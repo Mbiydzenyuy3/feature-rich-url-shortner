@@ -1,11 +1,22 @@
-//controller/auth-controller.js
-import bcrypt from "bcryptjs"; // To hash and compare passwords securely
-import jwt from "jsonwebtoken"; // To generate JWT tokens
+import bcrypt from "bcryptjs"; // For hashing passwords
+import jwt from "jsonwebtoken"; // For generating JWTs
 import * as AuthService from "../services/user.service.js";
 import { logError, logInfo } from "../utils/logger.js";
-import { query } from "../config/db.js";
+import { pool } from "../config/db.js";
 
-// Controller function for user registration
+const generateToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "3h" }
+  );
+};
+
+// ✅ User Registration
 export async function register(req, res, next) {
   const { username, email, password } = req.body;
 
@@ -16,15 +27,18 @@ export async function register(req, res, next) {
     });
   }
 
-  const client = await query("BEGIN");
+  const client = await pool.connect();
 
   try {
-    const existingUser = await query("SELECT 1 FROM users WHERE email = $1", [
-      email,
-    ]);
+    await client.query("BEGIN");
+
+    const existingUser = await client.query(
+      "SELECT 1 FROM users WHERE email = $1",
+      [email]
+    );
 
     if (existingUser.rowCount > 0) {
-      await query("ROLLBACK");
+      await client.query("ROLLBACK");
       return res.status(400).json({
         success: false,
         message: "Email already in use by another user.",
@@ -33,43 +47,32 @@ export async function register(req, res, next) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const userInsertResult = await query(
+    const insertResult = await client.query(
       `INSERT INTO users (username, email, password)
        VALUES ($1, $2, $3)
        RETURNING id`,
       [username, email, hashedPassword]
     );
 
-    const userId = userInsertResult.rows[0].id;
+    const userId = insertResult.rows[0].id;
 
-    await query("COMMIT");
+    await client.query("COMMIT");
 
-    const token = jwt.sign(
-      {
-        id: userId,
-        email,
-        username,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "3h" }
-    );
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "User registered successfully.",
-      data: {
-        id: userId,
-        email,
-        username,
-      },
+      data: { id: userId, email, username },
     });
   } catch (err) {
-    await query("ROLLBACK");
+    await client.query("ROLLBACK");
     logError("❌ Error during registration:", err);
-    next(err);
+    return next(err);
+  } finally {
+    client.release();
   }
 }
-// Controller function for user login
+
+// ✅ User Login
 export async function login(req, res, next) {
   const { email, password } = req.body;
 
@@ -99,22 +102,14 @@ export async function login(req, res, next) {
       });
     }
 
-    const tokenPayload = {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-    };
-
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "3h",
-    });
+    const token = generateToken(user);
 
     logInfo("User logged in", user.email);
 
     return res.status(200).json({
       success: true,
-      token: token,
-      message: "User logged in successfully",
+      message: "User logged in successfully.",
+      token,
       data: {
         id: user.id,
         email: user.email,
@@ -122,7 +117,16 @@ export async function login(req, res, next) {
       },
     });
   } catch (err) {
-    logError("Error logging in user", err);
+    logError("❌ Error logging in user:", err);
     next(err);
   }
+}
+
+export async function logoutUser(req, res) {
+  // In a stateless JWT system, logout is primarily handled client-side
+  // by deleting the token.
+  // This endpoint exists for convention and potential future use (e.g., blocklisting).
+  const userId = req.user ? req.user.id : "Unknown (no token?)"; // Get user ID if authenticated
+  logger.info(`Logout requested for user ID: ${userId}`);
+  res.json({ message: "Logout successful. Please discard your token." });
 }

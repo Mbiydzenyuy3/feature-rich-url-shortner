@@ -1,4 +1,4 @@
-import { logError } from "../utils/logger.js";
+import { logDebug, logError, logInfo } from "../utils/logger.js";
 import { pool } from "../config/db.js";
 
 const getRedirectUrl = async (req, res) => {
@@ -7,19 +7,23 @@ const getRedirectUrl = async (req, res) => {
   try {
     const result = await pool.query(
       `
-      SELECT long_url, expire_at, click_count FROM urls WHERE short_code = $1
+      SELECT id, long_url, expire_at, click_count FROM urls WHERE short_code = $1
     `,
       [shortCode]
     );
 
     if (result.rowCount === 0) {
+      logDebug(`Short code not found: ${shortCode}`);
       return res.status(404).json({ message: "Short url not found" });
     }
 
-    const { long_url, expire_at } = result.rows[0];
+    const { long_url, expire_at, click_count, id } = result.rows[0];
 
     if (expire_at && new Date() > new Date(expire_at)) {
-      return res.status(410).json({ message: "This link has expired" });
+      logDebug(`Short code expired: ${shortCode}`);
+      return res
+        .status(410)
+        .json({ message: "This short Url link has expired" });
     }
 
     //Increment click count
@@ -30,10 +34,22 @@ const getRedirectUrl = async (req, res) => {
       [shortCode]
     );
 
+    await pool.query(
+      `INSERT INTO click_logs(url_id) VALUES($1) RETURNING clicked_at`,
+      [id]
+    );
+    logInfo("Click stamp recorded");
+
+    logInfo(`Redirecting to ${long_url} | Clicks: ${click_count + 1}`);
+
+    //Redirect to the original URL
     return res.redirect(302, long_url);
   } catch (error) {
-    logError("Redirect error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    logError(`Redirection failed for ${shortCode}: ${error.message}`);
+    return res.status(500).json({
+      message: "Failed to process short url",
+      error: error.message,
+    });
   }
 };
 
