@@ -11,7 +11,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Header />
-      <main className="container">
+      <main className="container main-content">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/register" element={<Register />} />
