@@ -1,19 +1,14 @@
 export default function UrlList({ urls }) {
-  if (!urls || urls.length === 0) {
-    return <p>No URLs to display.</p>;
-  }
-
   return (
-    <div>
-      <h3>My Short URLs</h3>
+    <div className="url-list">
+      <h3>List URLs</h3>
       <ul>
-        {urls.map((url) => (
-          <li key={url.shortCode}>
-            <strong>{url.shortCode}</strong>:{" "}
-            <a href={url.longUrl} target="_blank">
-              {url.longUrl}
+        {urls.map((u) => (
+          <li key={u.shortCode}>
+            <a href={u.longUrl} target="_blank" rel="noopener noreferrer">
+              {u.long_url}
             </a>{" "}
-            (Clicks: {url.clicks})
+            <strong>{u.short_code}</strong> {/* (Clicks: {u.click_count}) */}
           </li>
         ))}
       </ul>
