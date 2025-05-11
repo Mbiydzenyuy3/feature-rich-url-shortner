@@ -8,6 +8,9 @@ export default function Header() {
         <Link to="/" className="text-xl font-bold">
           <h1 className="logo">🔗Short.ly</h1>
         </Link>
+        <Link to="/urls" className="all-urls">
+          All Urls
+        </Link>
 
         <div className="space-x-4">
           <Link to="/register" className="hover:underline">

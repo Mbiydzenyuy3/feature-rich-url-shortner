@@ -49,6 +49,7 @@ export default function ShortenForm({ onShortened }) {
 
   return (
     <form id="longurl" onSubmit={handleSubmit}>
+      <h3>Paste the URL to be shortened</h3>
       <div className="input-button">
         <input
           className="input-form"
@@ -61,6 +62,13 @@ export default function ShortenForm({ onShortened }) {
         <button className="submit" type="submit">
           Shorten
         </button>
+      </div>
+      <div className="p">
+        <p>
+          Short.ly is a free tool to shorten URLs and generate short links URL{" "}
+          <br /> shortener allows to create a shortened link making it easy to
+          share
+        </p>
       </div>
       {shortenedUrl && (
         <div>
