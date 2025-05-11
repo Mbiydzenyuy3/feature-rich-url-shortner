@@ -25,11 +25,13 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Extract user ID from token payload
-    const userId = decoded.sub || decoded.id
+    const userId = decoded.sub || decoded.id || decoded.user?.id;
 
     if (!userId) {
       logInfo("Auth middleware: Token payload missing user identifier.");
-      return res.status(401).json({ message: "Invalid token payload." });
+      return res
+        .status(401)
+        .json({ message: "Invalid token payload." }, JSON.stringify(decoded));
     }
 
     logDebug("Auth middleware: Decoded JWT payload", decoded);

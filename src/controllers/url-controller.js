@@ -1,16 +1,18 @@
 //controller/url-controller.js
 import { pool } from "../config/db.js";
 import generateShortCode from "../utils/shortCodeGen.js";
-import { logError, logInfo } from "../utils/logger.js";
+import { logDebug, logError, logInfo } from "../utils/logger.js";
 
 const createShortUrl = async (req, res, next) => {
   const { longUrl, customCode, expireInDays } = req.body;
   const userId = req.user.id;
-
+  logDebug("Received data in createShortUrl:", req.body); // Add this log to see the request data
   try {
     if (customCode) {
       const checkCustomCode = `SELECT * FROM urls WHERE short_code=$1`;
-      const checkCustomCodeResult = await pool.query(checkCustomCode, [customCode]);
+      const checkCustomCodeResult = await pool.query(checkCustomCode, [
+        customCode,
+      ]);
 
       if (checkCustomCodeResult.rows.length > 0) {
         logError(`Custom code ${customCode} is already in use`);
@@ -54,12 +56,13 @@ const createShortUrl = async (req, res, next) => {
       shortened_URL: shortUrl,
       original_URL: longUrl,
       created_at: insertUrlInfoResult.rows[0].created_at,
-      expire_at:
-        insertUrlInfoResult.rows[0].expires_at || "No expiration time",
+      expire_at: insertUrlInfoResult.rows[0].expire_at || "No expiration time",
     });
   } catch (error) {
     logError("Error creating short Url", error);
-    res.status(500).json({ message: "Error creating short url, double check for wrong field or data" });
+    res.status(500).json({
+      message: "Error creating short url, double check for wrong field or data",
+    });
   }
 };
 
@@ -68,17 +71,15 @@ const getUserUrls = async (req, res, next) => {
 
   try {
     const result = `
-      SELECT * FROM urls WHERE user_id = $1 ORDER BY created_at
+      SELECT * FROM urls WHERE user_id = $1 ORDER BY created_at DESC
     `;
     const getUrlsResult = await pool.query(result, [userId]);
 
     if (getUrlsResult.rows.length === 0) {
       logError("There are no shortened urls for this account");
-      return res
-        .status(404)
-        .json({
-          message: `NO shortened urls have been created for this user: ${userId}`,
-        });
+      return res.status(404).json({
+        message: `NO shortened urls have been created for this user: ${userId}`,
+      });
     }
     return res.status(200).json({
       message: "Available urls",
