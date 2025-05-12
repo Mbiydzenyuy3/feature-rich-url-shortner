@@ -117,7 +117,7 @@ Swagger UI available at:
 http://localhost:4000/api-docs
 
 ## Pull request link to the frontend repo
-- 
+- https://github.com/Mbiydzenyuy3/feature-rich-url-shortner/pull/2
 
 ## 🧩 Extra Features (Optional)
 - Analytics Endpoint — View stats for each short URL (clicks, creation date, etc.)
