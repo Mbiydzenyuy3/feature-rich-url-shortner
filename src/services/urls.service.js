@@ -13,7 +13,7 @@ export const createShortUrlService = async ({
   // Check for custom code conflict
   if (customCode) {
     const existing = await pool.query(
-      "SELECT 1 FROM urls WHERE custom_code=$1",
+      "SELECT 1 FROM urls WHERE short_code=$1",
       [customCode]
     );
     if (existing.rowCount > 0) {
@@ -29,7 +29,7 @@ export const createShortUrlService = async ({
   const expireDate = expireAt ? new Date(expireAt) : null;
 
   const insertQuery = `
-    INSERT INTO urls (long_url, custom_code, expire_at, user_id, short_url, click_count)
+    INSERT INTO urls (long_url, short_code, expire_at, user_id, short_url, click_count)
     VALUES ($1, $2, $3, $4, $5, 0)
     RETURNING custom_code, short_url, long_url, created_at, expire_at
   `;
@@ -49,7 +49,7 @@ export const getUserUrlsService = async (userId) => {
 
 export const getUrlStatsService = async (customCode, userId) => {
   const result = await pool.query(
-    `SELECT long_url, click_count, created_at, expire_at FROM urls WHERE custom_code = $1 AND user_id = $2`,
+    `SELECT long_url, click_count, created_at, expire_at FROM urls WHERE short_code = $1 AND user_id = $2`,
     [customCode, userId]
   );
   if (result.rowCount === 0) return null;
@@ -61,7 +61,7 @@ export const getUrlStatsService = async (customCode, userId) => {
 
 export const handleRedirectService = async (customCode) => {
   const result = await pool.query(
-    `SELECT id, long_url, expire_at, click_count FROM urls WHERE custom_code = $1`,
+    `SELECT id, long_url, expire_at, click_count FROM urls WHERE short_code = $1`,
     [customCode]
   );
   if (result.rowCount === 0) return { status: "not_found" };
