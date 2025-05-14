@@ -6,11 +6,10 @@ const shortenUrlSchema = Joi.object({
     "string.uri": "The longUrl must be a valid URI.",
     "any.required": "The longUrl field is required.",
   }),
-  customCode: Joi.string().alphanum().min(4).max(10).optional()
-.messages({
+  customCode: Joi.string().alphanum().min(4).max(10).optional().messages({
     "string.base": "The customCode must be a string.",
   }),
-  expireAt: Joi.date().iso().optional()
+  expireAt: Joi.date().iso().optional(),
 });
 
 export default shortenUrlSchema;
