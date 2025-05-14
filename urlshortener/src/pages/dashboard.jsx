@@ -1,10 +1,9 @@
-
 // src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api.js";
 import ShortenForm from "../components/ShortenInput.jsx";
-import UrlList from "../components/UrlList.jsx";
+// import UrlList from "../components/UrlList.jsx";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -34,7 +33,7 @@ export default function Dashboard() {
   return (
     <div className="shorturl-container">
       <ShortenForm onShortened={fetchUrls} />
-      <UrlList urls={urls} />
+
       {loading && <p>Loading URLs...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {!loading && urls.length === 0 && (
@@ -59,6 +58,7 @@ export default function Dashboard() {
           </li>
         ))}
       </ul>
+      {/* <UrlList urls={urls} /> */}
     </div>
   );
 }
