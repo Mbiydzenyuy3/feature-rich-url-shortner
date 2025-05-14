@@ -11,7 +11,7 @@ A secure and robust Node.js + Express backend API for shortening URLs with full 
 
 - User-specific dashboard (/api/my-urls)
 
-- Public redirection endpoint (/s/:shortCode)
+- Public redirection endpoint (/api/s/:shortCode)
 
 - Optional analytics endpoint (/api/shorten/:shortCode/stats)
 
@@ -71,6 +71,7 @@ Create a .env file in the root directory:
 
 PORT=4000
 DB_USER=your_db_user
+INIT_DB=true  (For Safer deployments by avoiding schema auto-runs)
 DB_PASSWORD=your_db_password
 DB_HOST=localhost
 DB_PORT=5432
@@ -84,13 +85,13 @@ npm run dev
 
 ## 📖 API Endpoint Summary
 
-Resource	        Method	        Path                        Description
-Auth	            POST	     /api/auth/register	              Register a new user
-Auth	            POST	     /api/auth/login	                Login and receive JWT token
-Shorten	          POST	     /api/shorten	                    Create a short URL (auth required)
-Redirect	        GET	       /s/:shortCode	                  Redirect to long URL (public)
-User URLs	        GET	       /api/shorten/my-urls	                    Get URLs created by current user
-Stats ⚙️	         GET	      /api/shorten/:shortCode/stats	   (Optional) Get stats for a short URL
+Resource	        Method	          Path                      Description
+Auth	            POST	        /api/auth/register	          Register a new user
+Auth	            POST	        /api/auth/login	              Login and receive JWT token
+Shorten	          POST	        /api/shorten	                Create a short URL (auth required)
+Redirect	        GET	          /api/s/:shortCode	(KT12FJ)    Redirect to long URL (public)
+User URLs	        GET	          /api/shorten/my-urls          Get URLs created by current user
+Stats ⚙️	         GET	         /api/s/:shortCode/stats	     (Optional) Get stats for a short URL
 
 ## 🔒 Authentication
 For all protected routes, include the JWT token in the request headers:

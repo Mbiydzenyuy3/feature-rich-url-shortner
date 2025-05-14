@@ -70,7 +70,7 @@ const swaggerOptions = {
           required: ["longUrl"],
           properties: {
             longUrl: { type: "string", format: "uri" },
-            shortCode: {ype: "string", format: "uri"},
+            customCode: {type: "string", format: "uri"},
             expiresAt: { type: "string", format: "date-time" },
           },
         },
@@ -78,7 +78,7 @@ const swaggerOptions = {
           type: "object",
           properties: {
             id: { type: "string", format: "uuid" },
-            shortcode: { type: "string", example: "abc123" },
+            customCode: { type: "string", example: "abc123" },
             longurl: { type: "string", format: "uri" },
             createdAt: { type: "string", format: "date-time" },
             expiresAt: { type: "string", format: "date-time", nullable: true },

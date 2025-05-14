@@ -2,6 +2,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 import pg from "pg";
+import fs from "fs"
+import path from "path"
 import { logInfo, logError, logDebug } from "../utils/logger.js";
 
 const { Pool } = pg;
@@ -79,96 +81,26 @@ const connectToDb = async () => {
 // ✅ Ensures DB schema creation is safe, consistent, and non-concurrent
 
 const initializeDbSchema = async () => {
-  const client = await pool.connect();
-  try {
-    logInfo("⚙️  Initializing database schema...");
+ const client = await pool.connect();
+ try {
+   logInfo("⚙️  Applying schema from schema.sql...");
+   const schemaPath = path.resolve("src", "config", "schema.sql");
+   const schema = fs.readFileSync(schemaPath, "utf-8");
 
-    // 🔐 Prevent concurrent schema initialization
-    await client.query("SELECT pg_advisory_lock(20250424)");
-    await client.query("BEGIN");
+   await client.query("BEGIN");
+   await client.query("SELECT pg_advisory_lock(20250424)"); //prevents two servers from initializing schema at once.
+   await client.query(schema);
+   await client.query("COMMIT");
 
-    //Enable pgcrypto
-    await client.query("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
-
-    //USERS TABLE
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS users(
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        username VARCHAR (50) NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW()
-      );
-      `);
-
-    //urls
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS urls (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        short_code VARCHAR(8) UNIQUE NOT NULL,
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        long_url VARCHAR(255) NOT NULL,
-        short_url TEXT,
-        click_count INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT NOW(),
-        expire_at TIMESTAMP NULL,
-        updated_at TIMESTAMP DEFAULT now()
-      );
-    `);
-
-    //Indexes
-    await client.query(` 
-      CREATE INDEX IF NOT EXISTS idx_short_urls_user_id ON urls(user_id);
-      `);
-    logInfo("urls table has been created successfully");
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS click_logs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        url_id UUID REFERENCES urls(id) ON DELETE CASCADE,
-        clicked_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
-
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_click_logs_url_id ON click_logs(url_id);
-    `);
-
-    // TRIGGERS
-    await client.query(`
-      CREATE OR REPLACE FUNCTION update_updated_at_column()
-       RETURNS TRIGGER AS $$
-      BEGIN
-       NEW.updated_at = NOW();
-       RETURN NEW;
-      END;
-      $$ LANGUAGE plpgsql;
-
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_users_updated_at') THEN
-          CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-        END IF;
-
-        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_urls_updated_at') THEN
-          CREATE TRIGGER update_urls_updated_at BEFORE UPDATE ON urls FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-        END IF;
-      END $$;
-    `);
-
-    logDebug("All Triggers checked and created");
-
-    await client.query("COMMIT");
-    logInfo("🎉 DB schema initialized successfully!");
-    // 🔐 Prevent concurrent schema initialization
-  } catch (error) {
-    await client.query("ROLLBACK");
-    logError("❌ Error while initializing the schema", error);
-    throw error;
-  } finally {
-    await client.query("SELECT pg_advisory_unlock(20250424)");
-    client.release();
-  }
+   logInfo("🎉 Schema applied successfully!");
+ } catch (error) {
+   await client.query("ROLLBACK");
+   logError("❌ Error applying schema", error);
+   throw error;
+ } finally {
+   await client.query("SELECT pg_advisory_unlock(20250424)"); //So your DB won’t get partial schema setups even if there's a crash.
+   client.release();
+ }
 };
 
 // 🛠️ Utility to run arbitrary SQL queries
