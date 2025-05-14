@@ -1,4 +1,4 @@
-import { handleRedirectService } from "../services/urls.service.js";
+import { handleRedirectService, getUrlStatsService } from "../services/urls.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 
 const getRedirectUrl = async (req, res) => {

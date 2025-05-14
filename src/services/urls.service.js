@@ -55,7 +55,7 @@ export const getUrlStatsService = async (shortCode, userId) => {
   if (result.rowCount === 0) return null;
 
   const url = result.rows[0];
-  const shortUrl = `${process.env.BASE_URL}/s/${customCode}`;
+  const shortUrl = `${process.env.BASE_URL}/s/${shortCode}`;
   return { ...url, short_url: shortUrl };
 };
 
