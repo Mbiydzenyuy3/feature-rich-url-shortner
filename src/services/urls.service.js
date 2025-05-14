@@ -4,17 +4,17 @@ import generateShortCode from "../utils/shortCodeGen.js";
 
 export const createShortUrlService = async ({
   longUrl,
-  customCode,
+  shortCode,
   expireAt,
   userId,
 }) => {
-  const shortCode = customCode || generateShortCode(6);
+  const customCode = shortCode || generateShortCode(6);
 
   // Check for custom code conflict
-  if (customCode) {
+  if (shortCode) {
     const existing = await pool.query(
-      "SELECT 1 FROM urls WHERE custom_code=$1",
-      [customCode]
+      "SELECT 1 FROM urls WHERE short_code=$1",
+      [shortCode]
     );
     if (existing.rowCount > 0) {
       throw new Error("Custom Code conflict");
@@ -23,15 +23,15 @@ export const createShortUrlService = async ({
 
   // Use BASE_URL
   const baseUrl = process.env.BASE_URL;
-  const shortUrl = `${baseUrl}/s/${shortCode}`;
+  const shortUrl = `${baseUrl}/s/${customCode}`;
 
   // Normalize expireAt
   const expireDate = expireAt ? new Date(expireAt) : null;
 
   const insertQuery = `
-    INSERT INTO urls (long_url, custom_code, expire_at, user_id, short_url, click_count)
+    INSERT INTO urls (long_url, short_code, expire_at, user_id, short_url, click_count)
     VALUES ($1, $2, $3, $4, $5, 0)
-    RETURNING custom_code, short_url, long_url, created_at, expire_at
+    RETURNING short_code, short_url, long_url, created_at, expire_at
   `;
   const values = [longUrl, customCode, expireDate, userId, shortUrl];
 
@@ -47,10 +47,10 @@ export const getUserUrlsService = async (userId) => {
   return result.rows;
 };
 
-export const getUrlStatsService = async (customCode, userId) => {
+export const getUrlStatsService = async (shortCode, userId) => {
   const result = await pool.query(
-    `SELECT long_url, click_count, created_at, expire_at FROM urls WHERE custom_code = $1 AND user_id = $2`,
-    [customCode, userId]
+    `SELECT long_url, click_count, created_at, expire_at FROM urls WHERE short_code = $1 AND user_id = $2`,
+    [shortCode, userId]
   );
   if (result.rowCount === 0) return null;
 
@@ -59,10 +59,10 @@ export const getUrlStatsService = async (customCode, userId) => {
   return { ...url, short_url: shortUrl };
 };
 
-export const handleRedirectService = async (customCode) => {
+export const handleRedirectService = async (shortCode) => {
   const result = await pool.query(
-    `SELECT id, long_url, expire_at, click_count FROM urls WHERE custom_code = $1`,
-    [customCode]
+    `SELECT id, long_url, expire_at, click_count FROM urls WHERE short_code = $1`,
+    [shortCode]
   );
   if (result.rowCount === 0) return { status: "not_found" };
 

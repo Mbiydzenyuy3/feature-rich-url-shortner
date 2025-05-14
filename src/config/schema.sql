@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS click_logs (
 
 -- INDEXES
 CREATE INDEX IF NOT EXISTS idx_short_urls_user_id ON urls(user_id);
-CREATE INDEX IF NOT EXISTS idx_urls_custom_code ON urls(custom_code);
+CREATE INDEX IF NOT EXISTS idx_urls_short_code ON urls(short_code);
 CREATE INDEX IF NOT EXISTS idx_click_logs_url_id ON click_logs(url_id);
 
 -- TRIGGER FUNCTION

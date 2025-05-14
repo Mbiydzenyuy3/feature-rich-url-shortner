@@ -2,13 +2,13 @@ import * as UrlServices from "../services/urls.service.js";
 import { logError } from "../utils/logger.js";
 
 const createShortUrl = async (req, res) => {
-  const { longUrl, customCode, expiresAt } = req.body;
+  const { longUrl, shortCode, expiresAt } = req.body;
   const userId = req.user.id;
 
   try {
     const result = await UrlServices.createShortUrlService({
       longUrl,
-      customCode,
+      shortCode,
       expireAt: expiresAt,
       userId,
     });
@@ -19,7 +19,7 @@ const createShortUrl = async (req, res) => {
       expire_at: result.expire_at || "No expiration time",
     });
   } catch (err) {
-    if (err.message.includes("Custom Code conflict")) {
+    if (err.message.includes("short Code conflict")) {
       return res.status(409).json({ message: "Custom code already in use" });
     }
     logError("Error creating short URL:", err);
