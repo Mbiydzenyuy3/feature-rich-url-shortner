@@ -14,13 +14,14 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS urls (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   short_code VARCHAR(8) UNIQUE NOT NULL,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID,
   long_url VARCHAR(255) NOT NULL,
   short_url TEXT,
   click_count INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW(),
   expire_at TIMESTAMP NULL,
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- CLICK LOGS TABLE
