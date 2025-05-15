@@ -13,7 +13,7 @@ export async function apiFetch(endpoint, options = {}) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${baseURL}/${endpoint}`, {
+  const response = await fetch(`${baseURL}${endpoint}`, {
     ...options,
     headers,
   });
