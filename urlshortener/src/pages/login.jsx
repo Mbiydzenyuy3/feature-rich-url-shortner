@@ -15,7 +15,7 @@ export default function Login() {
         body: JSON.stringify(form),
       });
       localStorage.setItem("token", res.token);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       alert("Login failed: " + err.message);
     }

@@ -20,7 +20,7 @@ body {
   background-color: #f5f4f4;
   font-size: 16px;
   padding: 32px;
-  height: 100vh;
+  /* height: 100vh; */
 }
 
 .container {
@@ -104,7 +104,6 @@ form {
 }
 
 .shorturl-container {
-  width: 80%;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -140,6 +139,7 @@ input {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin: 64px auto;
 }
 
 input {
@@ -173,6 +173,15 @@ button.btn.login {
 
 .url-list {
   margin-top: 40px;
+}
+
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 65vh;
+  align-items: center;
+  justify-content: center;
 }
 
 .footer {

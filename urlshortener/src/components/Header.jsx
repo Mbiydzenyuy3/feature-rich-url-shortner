@@ -10,9 +10,9 @@ export default function Header() {
             <span>🔗</span>Short.ly
           </h1>
         </Link>
-        <Link to="/urls" className="all-urls">
+        {/* <Link to="/urls" className="all-urls">
           All Urls
-        </Link>
+        </Link> */}
 
         <div className="space-x-4">
           <Link to="/register" className="hover:underline">
