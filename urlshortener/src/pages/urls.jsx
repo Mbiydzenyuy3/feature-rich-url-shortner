@@ -12,7 +12,7 @@ export default function UrlListPage() {
     const fetchUrls = async () => {
       try {
         setLoading(true);
-        const data = await apiFetch("/api/shorten/get-urls");
+        const data = await apiFetch("/api/shorten/my-urls");
         setUrls(data.urls);
       } catch (err) {
         console.error("Error fetching URLs:", err);

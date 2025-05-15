@@ -27,14 +27,14 @@ export default function Login() {
       <input
         type="email"
         className="input"
-        placeholder="email"
+        placeholder="Enter email"
         value={form.email}
         onChange={(e) => setForm({ ...form, email: e.target.value })}
       />
       <input
         type="password"
         className="input"
-        placeholder="Password"
+        placeholder="Enter Password"
         value={form.password}
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />

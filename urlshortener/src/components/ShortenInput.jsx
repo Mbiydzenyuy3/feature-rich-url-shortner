@@ -25,7 +25,7 @@ export default function ShortenForm({ onShortened }) {
       if (expireInDays) requestData.expireInDays = parseInt(expireInDays, 10);
 
       // POST the long URL to be shortened
-      const data = await apiFetch("/api/shorten/shortener", {
+      const data = await apiFetch("/api/shorten", {
         method: "POST",
         body: JSON.stringify(requestData),
       });

@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api.js";
 import ShortenForm from "../components/ShortenInput.jsx";
-// import UrlList from "../components/UrlList.jsx";
+import Header from "../components/Header.jsx";
+import UrlList from "../components/UrlList.jsx";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function Dashboard() {
   const fetchUrls = async () => {
     try {
       setLoading(true);
-      const data = await apiFetch("/api/shorten/get-urls");
+      const data = await apiFetch("/api/shorten/my-urls");
       setUrls(data.urls);
     } catch (err) {
       console.error("Error fetching URLs:", err);
@@ -32,6 +33,7 @@ export default function Dashboard() {
 
   return (
     <div className="shorturl-container">
+      <Header/>
       <ShortenForm onShortened={fetchUrls} />
 
       {loading && <p>Loading URLs...</p>}
@@ -39,6 +41,7 @@ export default function Dashboard() {
       {!loading && urls.length === 0 && (
         <p>No shortened URLs yet. Create one above!</p>
       )}
+      {loading && urls.length > 0 && <UrlList urls={urls} />}
       <ul className="ul">
         {urls.map((u) => (
           <li key={u.short_code} className="li">
@@ -58,7 +61,6 @@ export default function Dashboard() {
           </li>
         ))}
       </ul>
-      {/* <UrlList urls={urls} /> */}
     </div>
   );
 }
