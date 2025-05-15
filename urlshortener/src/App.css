@@ -20,7 +20,7 @@ body {
   background-color: #f5f4f4;
   font-size: 16px;
   padding: 32px;
-  /* height: 100vh; */
+  height: 100vh;
 }
 
 .container {
@@ -48,6 +48,11 @@ a {
   color: #333;
   text-decoration: none;
   font-size: 16px;
+}
+
+.create-account {
+  color: blue;
+  text-decoration: underline;
 }
 
 li {

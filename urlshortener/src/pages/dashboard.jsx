@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   return (
     <div className="shorturl-container">
-      <Header/>
+      <Header />
       <ShortenForm onShortened={fetchUrls} />
 
       {loading && <p>Loading URLs...</p>}

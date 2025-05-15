@@ -15,11 +15,8 @@ export default function Header() {
         </Link> */}
 
         <div className="space-x-4">
-          <Link to="/register" className="hover:underline">
-            <button className="btn register"> Register</button>
-          </Link>
-          <Link to="/login" className="hover:underline">
-            <button className="btn login">Login</button>
+          <Link to="/" className="hover:underline">
+            <button className="btn login">Logout</button>
           </Link>
         </div>
       </header>

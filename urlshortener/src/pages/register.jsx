@@ -41,6 +41,12 @@ export default function Register() {
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />
       <button className="cta">Register</button>
+      <div className="option">
+        <p>Already have an account? </p>
+        <a href="/login" className="create-account">
+          Login
+        </a>
+      </div>
     </form>
   );
 }

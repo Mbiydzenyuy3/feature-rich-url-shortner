@@ -17,7 +17,7 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="btns">
-          <Link to="/dashboard">
+          <Link to="/register">
             {" "}
             <button className="btn register">Get Started</button>
           </Link>
