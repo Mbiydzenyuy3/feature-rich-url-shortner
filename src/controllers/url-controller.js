@@ -31,7 +31,7 @@ const getUserUrls = async (req, res) => {
   try {
     const urls = await UrlServices.getUserUrlsService(req.user.id);
     if (urls.length === 0) {
-      return res.status(404).json({ message: "No URLs found" });
+      return res.status(200).json({ urls: [] });
     }
     res.status(200).json({ urls });
   } catch (err) {

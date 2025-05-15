@@ -35,8 +35,12 @@ export const createShortUrlService = async ({
   `;
   const values = [longUrl, customCode, expireDate, userId, shortUrl];
 
-  const result = await pool.query(insertQuery, values);
-  return result.rows[0];
+  try {
+    const result = await pool.query(insertQuery, values);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getUserUrlsService = async (userId) => {
