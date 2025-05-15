@@ -1,4 +1,3 @@
-
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 // A helper to attach auth headers and parse JSON
@@ -14,7 +13,7 @@ export async function apiFetch(endpoint, options = {}) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${baseURL}${endpoint}`, {
+  const response = await fetch(`${baseURL}/${endpoint}`, {
     ...options,
     headers,
   });
@@ -29,4 +28,3 @@ export async function apiFetch(endpoint, options = {}) {
 
   return response.json();
 }
-
