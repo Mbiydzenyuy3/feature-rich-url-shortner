@@ -16,7 +16,12 @@ export default function Dashboard() {
     try {
       setLoading(true);
       const data = await apiFetch("/api/shorten/my-urls");
-      setUrls(data.urls);
+
+      if (data.urls.length >= 3) {
+        setUrls([]); // Clear the dashboard
+      } else {
+        setUrls(data.urls);
+      }
     } catch (err) {
       console.error("Error fetching URLs:", err);
       setError("Failed to fetch URLs.");
