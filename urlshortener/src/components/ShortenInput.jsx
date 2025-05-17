@@ -1,4 +1,3 @@
-// src/components/ShortenInput.jsx
 import { useState } from "react";
 import { apiFetch } from "../api.js";
 
@@ -70,6 +69,7 @@ export default function ShortenForm({ onShortened }) {
             share
           </p>
         </div>
+
         {shortenedUrl && (
           <div>
             <p>Shortened URL:</p>
