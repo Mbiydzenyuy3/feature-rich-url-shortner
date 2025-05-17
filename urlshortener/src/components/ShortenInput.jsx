@@ -7,15 +7,14 @@ export default function ShortenForm({ onShortened }) {
   const [customCode, setCustomCode] = useState("");
   const [expireInDays, setExpireInDays] = useState("");
   const [shortenedUrl, setShortenedUrl] = useState("");
+  const [ShowDialog, setShowDialog] = useState(false);
+
+  const isValidUrlScheme = (url) => /^https?:\/\//i.test(url.trim());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (
-      !longUrl.trim().startsWith("http://") &&
-      !longUrl.trim().startsWith("https://")
-    ) {
-      alert("Please include http:// or https:// in your URL");
+    if (!isValidUrlScheme(longUrl)) {
+      setShowDialog(true);
       return;
     }
 
@@ -48,36 +47,45 @@ export default function ShortenForm({ onShortened }) {
   };
 
   return (
-    <form id="longurl" onSubmit={handleSubmit}>
-      <h3>Paste the URL to be shortened</h3>
-      <div className="input-button">
-        <input
-          className="input-form"
-          type="url"
-          value={longUrl}
-          onChange={(e) => setLongUrl(e.target.value)}
-          placeholder="Enter long URL"
-          required
-        />
-        <button className="submit" type="submit">
-          Shorten
-        </button>
-      </div>
-      <div className="p">
-        <p>
-          Short.ly is a free tool to shorten URLs and generate short links URL{" "}
-          <br /> shortener allows to create a shortened link making it easy to
-          share
-        </p>
-      </div>
-      {shortenedUrl && (
-        <div>
-          <p>Shortened URL:</p>
-          <a href={shortenedUrl} target="_blank" rel="noopener noreferrer">
-            {shortenedUrl}
-          </a>
+    <div className="form">
+      <form id="longurl" onSubmit={handleSubmit}>
+        <h3>Paste the URL to be shortened</h3>
+        <div className="input-button">
+          <input
+            className="input-form"
+            type="url"
+            value={longUrl}
+            onChange={(e) => setLongUrl(e.target.value)}
+            placeholder="Enter long URL"
+            required
+          />
+          <button className="submit" type="submit">
+            Shorten
+          </button>
         </div>
+        <div className="p">
+          <p>
+            Short.ly is a free tool to shorten URLs and generate short links URL{" "}
+            <br /> shortener allows to create a shortened link making it easy to
+            share
+          </p>
+        </div>
+        {shortenedUrl && (
+          <div>
+            <p>Shortened URL:</p>
+            <a href={shortenedUrl} target="_blank" rel="noopener noreferrer">
+              {shortenedUrl}
+            </a>
+          </div>
+        )}
+      </form>
+      {ShowDialog && (
+        <Dialog
+          title="Invalid URL"
+          message="Please include http:// or https:// in your URL."
+          onClose={() => setShowDialog(false)}
+        />
       )}
-    </form>
+    </div>
   );
 }
