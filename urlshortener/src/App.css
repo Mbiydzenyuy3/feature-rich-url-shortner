@@ -81,6 +81,8 @@ li {
 form {
   background-color: #fff;
   padding: 16px;
+  border: 1px solid #e7e4e4;
+  border-radius: 12px;
 }
 
 #longurl {

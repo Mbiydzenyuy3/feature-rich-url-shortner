@@ -2,13 +2,27 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api.js";
+import Dialog from "../components/Dialoguebox.jsx"; // assuming you have a Dialog component
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
   const navigate = useNavigate();
+
+  const isFormValid = () => {
+    return form.email?.trim() && form.password?.trim();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isFormValid()) {
+      setDialogMessage("wrong credentials, try again");
+      setShowDialog(true);
+      return;
+    }
+
     try {
       const res = await apiFetch("/api/auth/login", {
         method: "POST",
@@ -17,7 +31,8 @@ export default function Login() {
       localStorage.setItem("token", res.token);
       navigate("/dashboard");
     } catch (err) {
-      alert("Login failed: " + err.message);
+      setDialogMessage("Registration failed: " + err.message);
+      setShowDialog(true);
     }
   };
 
@@ -47,6 +62,13 @@ export default function Login() {
           </a>
         </div>
       </form>
+      {showDialog && (
+        <Dialog
+          title="Form Error"
+          message={dialogMessage}
+          onClose={() => setShowDialog(false)}
+        />
+      )}
     </div>
   );
 }

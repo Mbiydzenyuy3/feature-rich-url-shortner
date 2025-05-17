@@ -1,10 +1,12 @@
 import React from "react";
 
-export default function ShowDialogue({ title, message }, onClose) {
+export default function ShowDialogue({ title, message, onClose }) {
   return (
     <>
       <div
         style={{
+          width: "200px",
+          position: "absolute",
           top: "30%",
           left: "50%",
           transform: "translate(-50%, -30%)",
