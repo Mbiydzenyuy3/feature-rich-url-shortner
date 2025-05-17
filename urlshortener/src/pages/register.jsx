@@ -21,32 +21,34 @@ export default function Register() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 register-form">
-      <h2 className="text-xl font-bold mb-2">Register</h2>
-      <input
-        className="input"
-        placeholder="Username"
-        onChange={(e) => setForm({ ...form, username: e.target.value })}
-      />
-      <input
-        type="email"
-        className="input"
-        placeholder="email"
-        onChange={(e) => setForm({ ...form, email: e.target.value })}
-      />
-      <input
-        type="password"
-        className="w-full p-2 border mb-2"
-        placeholder="Password"
-        onChange={(e) => setForm({ ...form, password: e.target.value })}
-      />
-      <button className="cta">Register</button>
-      <div className="option">
-        <p>Already have an account? </p>
-        <a href="/login" className="create-account">
-          Login
-        </a>
-      </div>
-    </form>
+    <div className="form">
+      <form onSubmit={handleSubmit} className="p-4 register-form">
+        <h2 className="text-xl font-bold mb-2">Register</h2>
+        <input
+          className="input"
+          placeholder="Username"
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
+        />
+        <input
+          type="email"
+          className="input"
+          placeholder="email"
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
+        <input
+          type="password"
+          className="w-full p-2 border mb-2"
+          placeholder="Password"
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
+        <button className="cta">Register</button>
+        <div className="option">
+          <p>Already have an account? </p>
+          <a href="/login" className="create-account">
+            Login
+          </a>
+        </div>
+      </form>
+    </div>
   );
 }
