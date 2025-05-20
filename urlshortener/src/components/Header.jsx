@@ -7,7 +7,7 @@ export default function Header() {
       <header className="header">
         <Link to="/" className="text-xl font-bold">
           <h1 className="logo">
-            <span>🔗</span>Short.ly
+            <span>🔗</span>Shortlynk
           </h1>
         </Link>
         {/* <Link to="/urls" className="all-urls">

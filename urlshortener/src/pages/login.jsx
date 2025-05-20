@@ -55,11 +55,28 @@ export default function Login() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
         <button className="cta">Login</button>
-        <div className="option">
+        <div
+          className="option"
+          style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+        >
           <p>Create an account if haven't yet? </p>
           <a href="/register" className="create-account">
             Create account
           </a>
+          <button
+            type="button"
+            className="cta mt-4 bg-white border text-black flex items-center justify-center"
+            onClick={() => {
+              window.location.href = "http://localhost:4000/api/oauth/google";
+            }}
+          >
+            <img
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="Google Logo"
+              style={{ width: 20, marginRight: 8 }}
+            />
+            Continue with Google
+          </button>
         </div>
       </form>
       {showDialog && (
