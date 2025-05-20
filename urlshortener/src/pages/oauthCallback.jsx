@@ -19,5 +19,5 @@ export default function OAuthCallback() {
     }
   }, [location]);
 
-  return <p>Authenticating with Google...</p>;
+  return <p>Processing login with Google...</p>;
 }
