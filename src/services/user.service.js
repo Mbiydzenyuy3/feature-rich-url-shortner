@@ -5,6 +5,7 @@ import {
 } from "../models/user-model.js";
 import jwt from "jsonwebtoken";
 
+
 // Generate JWT Token
 const generateToken = (user) => {
   return jwt.sign(

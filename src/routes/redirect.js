@@ -1,6 +1,9 @@
 import express from "express";
-import { getRedirectUrl, getUrlStats } from "../controllers/redirecturl-controller.js";
-import authMiddleware from "../middlewares/user-auth.middleware.js";
+import {
+  getRedirectUrl,
+  getUrlStats,
+} from "../controllers/redirecturl-controller.js";
+import { authMiddleware } from "../middlewares/user-auth.middleware.js";
 
 const router = express.Router();
 
@@ -26,7 +29,6 @@ const router = express.Router();
 
 router.get("/:shortCode", getRedirectUrl);
 
-
 /**
  * @swagger
  * /s/{shortCode}/stats:
@@ -51,6 +53,5 @@ router.get("/:shortCode", getRedirectUrl);
  *         description: Short URL not found
  */
 router.get("/:shortCode/stats", authMiddleware, getUrlStats);
-
 
 export default router;

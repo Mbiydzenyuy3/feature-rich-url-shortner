@@ -72,4 +72,13 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-export default authMiddleware;
+// export const isAuthenticated = (req, res, next) => {
+//   if (req.session && req.session.user) {
+//     return next();
+//   }
+//   res.status(401).json({
+//     message: "Unauthorized",
+//   });
+// };
+
+export { authMiddleware };

@@ -1,3 +1,4 @@
+//app.js
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
@@ -32,7 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //API Routes
 app.use("/", indexRouter);
-app.use("/api/auth", authRouter);
+app.use("/api/oauth", authRouter);
 app.use("/api/shorten", urlRouter);
 app.use("/api/s", redirectRouter);
 
