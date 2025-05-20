@@ -7,6 +7,7 @@ import cors from "cors";
 import morgan from "morgan";
 import { fileURLToPath } from "node:url";
 import path, { dirname } from "node:path";
+import helmet from "helmet";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swaggerConfig.js";
@@ -24,8 +25,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Middleware
+app.use(helmet());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
-app.use(cors());
+app.disable("x-powered-by");
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
