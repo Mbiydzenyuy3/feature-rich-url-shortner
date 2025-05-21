@@ -101,12 +101,12 @@ export const googleAuthCallback = async (req, res) => {
     // Check DB user
     try {
       const existingUser = await query(
-        "SELECT id FROM users WHERE id = $1 LIMIT 1",
+        "SELECT user_id FROM users WHERE user_id = $1 LIMIT 1",
         [userInfo.id]
       );
       if (existingUser.rowCount === 0) {
         await query(
-          "INSERT INTO users (id, email, username) VALUES ($1, $2, $3)",
+          "INSERT INTO users (user_id, email, name) VALUES ($1, $2, $3)",
           [userInfo.id, userInfo.email, userInfo.name]
         );
       }
@@ -116,7 +116,7 @@ export const googleAuthCallback = async (req, res) => {
     }
 
     const jwtPayload = {
-      id: userInfo.id,
+      user_id: userInfo.user_id,
       email: userInfo.email,
       name: userInfo.name,
     };
