@@ -67,7 +67,8 @@ export default function Login() {
             type="button"
             className="cta mt-4 bg-white border text-black flex items-center justify-center"
             onClick={() => {
-              window.location.href = "http://localhost:4000/api/oauth/google";
+              window.location.href =
+                "http://https://feature-rich-url-shortner-production.up.railway.app//api/oauth/google";
             }}
           >
             <img
