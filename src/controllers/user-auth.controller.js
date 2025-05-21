@@ -44,11 +44,30 @@ export function logoutUser(req, res) {
 }
 
 //Redirect user to Google's OAuth 2.0 server
+export const googleAuthRedirect = (req, res) => {
+  const state = generateOAuthState();
+
+  //Generate a url that asks permissions
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope,
+    response_type: "code",
+    //Enable incremental authorization.
+    include_granted_scopes: true,
+    //include the state parameter to reduce of Cross-Site Request Forgery attacks
+    state,
+    prompt: "consent",
+  });
+
+  res.redirect(authUrl);
+};
+
+// Handle Google's OAuth callback
 export const googleAuthCallback = async (req, res) => {
   const { code, state } = req.query;
 
-  // Verify OAuth state token
   const stateValid = verifyOAuthState(state);
+
   if (!stateValid) {
     logDebug("OAuth state mismatch or expired");
     return res.status(400).send("Invalid or expired OAuth state");
@@ -63,45 +82,27 @@ export const googleAuthCallback = async (req, res) => {
     const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
     const { data: userInfo } = await oauth2.userinfo.get();
 
-    const googleId = userInfo.id;
-    const email = userInfo.email;
-    const name = userInfo.name || "Google User";
-
-    // Ensure user exists in DB
-    const existingUser = await query(
-      "SELECT id FROM users WHERE id = $1 LIMIT 1",
-      [googleId]
-    );
-
-    if (existingUser.rowCount === 0) {
-      await query(
-        "INSERT INTO users (id, email, username) VALUES ($1, $2, $3)",
-        [googleId, email, name]
-      );
-      logInfo(`👤 New Google user created: ${email}`);
-    } else {
-      logInfo(`👤 Existing Google user logged in: ${email}`);
-    }
-
-    // Create JWT payload
+    // generate a JWT payload to return
     const jwtPayload = {
-      id: googleId,
-      email,
-      name,
+      id: userInfo.id,
+      email: userInfo.email,
+      name: userInfo.name,
     };
 
-    // Sign JWT
+    
+
+    // Sign and return token
     const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || "5h",
     });
 
     logInfo("✅ Google Auth Success:", userInfo);
 
-    // Redirect to frontend with token
     const frontendRedirect = `${process.env.FRONTEND_URL}/oauth/callback?token=${jwtToken}`;
     return res.redirect(frontendRedirect);
   } catch (error) {
     logError("OAuth callback error:", error);
-    return res.status(500).send("OAuth callback failed.");
+    res.status(500).send("OAuth callback failed.");
   }
+  
 };
