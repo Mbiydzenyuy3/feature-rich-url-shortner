@@ -89,7 +89,18 @@ export const googleAuthCallback = async (req, res) => {
       name: userInfo.name,
     };
 
-    
+    // Ensure the user exists in your DB
+    const existingUser = await query(
+      "SELECT id FROM users WHERE id = $1 LIMIT 1",
+      [userInfo.id]
+    );
+
+    if (existingUser.rowCount === 0) {
+      await query(
+        "INSERT INTO users (id, email, username) VALUES ($1, $2, $3)",
+        [userInfo.id, userInfo.email, userInfo.name]
+      );
+    }
 
     // Sign and return token
     const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
