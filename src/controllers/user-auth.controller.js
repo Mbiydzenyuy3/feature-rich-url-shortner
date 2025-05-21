@@ -85,25 +85,30 @@ export const googleAuthCallback = async (req, res) => {
     const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
     const { data: userInfo } = await oauth2.userinfo.get();
 
+    // Look up user by email
+    const existingUser = await query(
+      "SELECT id FROM users WHERE email = $1 LIMIT 1",
+      [userInfo.email]
+    );
+
+    let userId;
+
+    if (existingUser.rowCount === 0) {
+      // Insert new user, let DB assign UUID
+      const result = await query(
+        "INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id",
+        [userInfo.email, userInfo.name, null] // ✅ use null safely now
+      );
+      userId = result.rows[0].id;
+    } else {
+      userId = existingUser.rows[0].id;
+    }
     // generate a JWT payload to return
     const jwtPayload = {
       id: userInfo.id,
       email: userInfo.email,
       name: userInfo.name,
     };
-
-    // Ensure the user exists in your DB
-    const existingUser = await query(
-      "SELECT id FROM users WHERE id = $1 LIMIT 1",
-      [userInfo.id]
-    );
-
-    if (existingUser.rowCount === 0) {
-      await query(
-        "INSERT INTO users (id, email, username) VALUES ($1, $2, $3)",
-        [userInfo.id, userInfo.email, userInfo.name]
-      );
-    }
 
     // Sign and return token
     const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
