@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api.js";
-import Dialog from "../components/Dialoguebox.jsx"; 
+import Dialog from "../components/Dialoguebox.jsx";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -68,7 +68,7 @@ export default function Login() {
             className="cta mt-4 bg-white border text-black flex items-center justify-center"
             onClick={() => {
               window.location.href =
-                "https://feature-rich-url-shortner-production.up.railway.app/api/oauth/google";
+                "https://feature-rich-url-shortner-production.up.railway.app/api/oauth/google/callback";
             }}
           >
             <img
