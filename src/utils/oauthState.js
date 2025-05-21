@@ -5,7 +5,7 @@ export function generateOAuthState() {
   return jwt.sign(
     { createdAt: Date.now() },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.EXPIRES_IN } // Short expiry
+    { expiresIn: "45m" } // Short expiry
   );
 }
 
