@@ -115,7 +115,7 @@ const query = async (text, params) => {
     return result;
   } catch (error) {
     logError(`❌ Query failed: ${text.slice(0, 80)}...`, error);
-    throw err;
+    throw error;
   }
 };
 

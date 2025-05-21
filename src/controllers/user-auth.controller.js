@@ -67,68 +67,55 @@ export const googleAuthCallback = async (req, res) => {
   const { code, state } = req.query;
 
   if (!state) {
-    logDebug("OAuth callback missing state");
+    logDebug("OAuth callback missing state parameter");
     return res.status(400).send("Missing OAuth state");
   }
+
   if (!code) {
-    logDebug("OAuth callback missing code");
+    logDebug("OAuth callback missing code parameter");
     return res.status(400).send("Missing OAuth code");
   }
 
-  const decodedState = verifyOAuthState(state);
-  if (!decodedState) {
-    logDebug("OAuth state mismatch or expired");
-    return res.status(400).send("Invalid or expired OAuth state");
-  }
-
-  // Create fresh oauth2Client instance
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_OAUTH_REDIRECT_URL
-  );
-
   try {
-    logDebug("Exchanging code for tokens...");
+    // Exchange code for tokens
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
+    // Fetch user info from Google
     const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
     const { data: userInfo } = await oauth2.userinfo.get();
 
-    logInfo("Google user info:", userInfo);
-
-    // Check DB user
-    try {
-      const existingUser = await query(
-        "SELECT user_id FROM users WHERE user_id = $1 LIMIT 1",
-        [userInfo.id]
-      );
-      if (existingUser.rowCount === 0) {
-        await query(
-          "INSERT INTO users (user_id, email, name) VALUES ($1, $2, $3)",
-          [userInfo.id, userInfo.email, userInfo.name]
-        );
-      }
-    } catch (dbErr) {
-      logError("DB error:", dbErr);
-      return res.status(500).send("Database error.");
-    }
-
+    // generate a JWT payload to return
     const jwtPayload = {
-      user_id: userInfo.user_id,
+      id: userInfo.id,
       email: userInfo.email,
       name: userInfo.name,
     };
 
+    // Ensure the user exists in your DB
+    const existingUser = await query(
+      "SELECT id FROM users WHERE id = $1 LIMIT 1",
+      [userInfo.id]
+    );
+
+    if (existingUser.rowCount === 0) {
+      await query(
+        "INSERT INTO users (id, email, username) VALUES ($1, $2, $3)",
+        [userInfo.id, userInfo.email, userInfo.name]
+      );
+    }
+
+    // Sign and return token
     const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || "5h",
     });
+
+    logInfo("✅ Google Auth Success:", userInfo);
 
     const frontendRedirect = `${process.env.FRONTEND_URL}/oauth/callback?token=${jwtToken}`;
     return res.redirect(frontendRedirect);
   } catch (error) {
     logError("OAuth callback error:", error);
-    return res.status(500).send("OAuth callback failed.");
+    res.status(500).send("OAuth callback failed.");
   }
 };
