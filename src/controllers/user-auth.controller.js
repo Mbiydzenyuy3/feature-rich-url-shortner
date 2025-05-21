@@ -66,54 +66,69 @@ export const googleAuthRedirect = (req, res) => {
 export const googleAuthCallback = async (req, res) => {
   const { code, state } = req.query;
 
-  const stateValid = verifyOAuthState(state);
+  if (!state) {
+    logDebug("OAuth callback missing state");
+    return res.status(400).send("Missing OAuth state");
+  }
+  if (!code) {
+    logDebug("OAuth callback missing code");
+    return res.status(400).send("Missing OAuth code");
+  }
 
-  if (!stateValid) {
+  const decodedState = verifyOAuthState(state);
+  if (!decodedState) {
     logDebug("OAuth state mismatch or expired");
     return res.status(400).send("Invalid or expired OAuth state");
   }
 
+  // Create fresh oauth2Client instance
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_OAUTH_REDIRECT_URL
+  );
+
   try {
-    // Exchange code for tokens
+    logDebug("Exchanging code for tokens...");
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    // Fetch user info from Google
     const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
     const { data: userInfo } = await oauth2.userinfo.get();
 
-    // generate a JWT payload to return
+    logInfo("Google user info:", userInfo);
+
+    // Check DB user
+    try {
+      const existingUser = await query(
+        "SELECT id FROM users WHERE id = $1 LIMIT 1",
+        [userInfo.id]
+      );
+      if (existingUser.rowCount === 0) {
+        await query(
+          "INSERT INTO users (id, email, username) VALUES ($1, $2, $3)",
+          [userInfo.id, userInfo.email, userInfo.name]
+        );
+      }
+    } catch (dbErr) {
+      logError("DB error:", dbErr);
+      return res.status(500).send("Database error.");
+    }
+
     const jwtPayload = {
       id: userInfo.id,
       email: userInfo.email,
       name: userInfo.name,
     };
 
-    // Ensure the user exists in your DB
-    const existingUser = await query(
-      "SELECT id FROM users WHERE id = $1 LIMIT 1",
-      [userInfo.id]
-    );
-
-    if (existingUser.rowCount === 0) {
-      await query(
-        "INSERT INTO users (id, email, username) VALUES ($1, $2, $3)",
-        [userInfo.id, userInfo.email, userInfo.name]
-      );
-    }
-
-    // Sign and return token
     const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || "5h",
     });
-
-    logInfo("✅ Google Auth Success:", userInfo);
 
     const frontendRedirect = `${process.env.FRONTEND_URL}/oauth/callback?token=${jwtToken}`;
     return res.redirect(frontendRedirect);
   } catch (error) {
     logError("OAuth callback error:", error);
-    res.status(500).send("OAuth callback failed.");
+    return res.status(500).send("OAuth callback failed.");
   }
-  
 };
