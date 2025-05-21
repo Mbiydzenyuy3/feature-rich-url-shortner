@@ -68,7 +68,7 @@ export default function Login() {
             className="cta mt-4 bg-white border text-black flex items-center justify-center"
             onClick={() => {
               window.location.href =
-                "https://feature-rich-url-shortner-production.up.railway.app/api/oauth/google/callback";
+                "https://feature-rich-url-shortner-production.up.railway.app/api/oauth/google";
             }}
           >
             <img
