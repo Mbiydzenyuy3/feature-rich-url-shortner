@@ -1,7 +1,7 @@
 import * as AuthService from "../services/user.service.js";
 import { logDebug, logError, logInfo } from "../utils/logger.js";
-import { generateOAuthState, verifyOAuthState } from "../utils/oauthState.js";
-import { oauth2Client, scope } from "../utils/getGoogleAuth.js";
+import { verifyOAuthState } from "../utils/oauthState.js";
+import { oauth2Client } from "../utils/getGoogleAuth.js";
 import jwt from "jsonwebtoken";
 import { google } from "googleapis";
 
@@ -44,81 +44,64 @@ export function logoutUser(req, res) {
 }
 
 //Redirect user to Google's OAuth 2.0 server
-export const googleAuthRedirect = (req, res) => {
-  const state = generateOAuthState();
 
-  //Generate a url that asks permissions
-  const authUrl = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope,
-    response_type: "code",
-    //Enable incremental authorization.
-    include_granted_scopes: true,
-    //include the state parameter to reduce of Cross-Site Request Forgery attacks
-    state,
-    prompt: "consent",
-  });
-
-  res.redirect(authUrl);
-};
-
-// Handle Google's OAuth callback
 export const googleAuthCallback = async (req, res) => {
   const { code, state } = req.query;
 
-  if (!state) {
-    logDebug("OAuth callback missing state parameter");
-    return res.status(400).send("Missing OAuth state");
+  // Step 1: Validate state
+  const validState = verifyOAuthState(state);
+  if (!validState) {
+    logDebug("Invalid or expired state token");
+    return res.status(400).send("Invalid OAuth state.");
   }
 
   if (!code) {
-    logDebug("OAuth callback missing code parameter");
-    return res.status(400).send("Missing OAuth code");
+    logDebug("Missing auth code from Google");
+    return res.status(400).send("Missing authorization code.");
   }
 
   try {
-    // Exchange code for tokens
+    // Step 2: Exchange code for tokens
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    // Fetch user info from Google
+    // Step 3: Fetch user info
     const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
     const { data: userInfo } = await oauth2.userinfo.get();
 
-    // Look up user by email
+    // Step 4: Check or create user
     const existingUser = await query(
       "SELECT id FROM users WHERE email = $1 LIMIT 1",
       [userInfo.email]
     );
 
     let userId;
-
     if (existingUser.rowCount === 0) {
-      // Insert new user, let DB assign UUID
       const result = await query(
         "INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id",
-        [userInfo.email, userInfo.name, null] // ✅ use null safely now
+        [userInfo.email, userInfo.name, null]
       );
       userId = result.rows[0].id;
     } else {
       userId = existingUser.rows[0].id;
     }
-    // generate a JWT payload to return
+
+    // Step 5: Generate JWT
     const jwtPayload = {
-      id: userInfo.id,
+      sub: userId,
       email: userInfo.email,
       name: userInfo.name,
     };
 
-    // Sign and return token
     const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || "5h",
     });
 
-    logInfo("✅ Google Auth Success:", userInfo);
+    logInfo("✅ Google OAuth successful for:", userInfo.email);
 
-    const frontendRedirect = `${process.env.FRONTEND_URL}/oauth/callback?token=${jwtToken}`;
-    return res.redirect(frontendRedirect);
+    // Step 6: Redirect to frontend with token
+    const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${jwtToken}`;
+    return res.redirect(redirectUrl);
   } catch (error) {
     logError("OAuth callback error:", error);
     res.status(500).send("OAuth callback failed.");
