@@ -1,7 +1,7 @@
 import * as AuthService from "../services/user.service.js";
 import { logDebug, logError, logInfo } from "../utils/logger.js";
-import { verifyOAuthState } from "../utils/oauthState.js";
-import { oauth2Client } from "../utils/getGoogleAuth.js";
+import { generateOAuthState, verifyOAuthState } from "../utils/oauthState.js";
+import { oauth2Client, scope } from "../utils/getGoogleAuth.js";
 import { pool } from "../config/db.js";
 import jwt from "jsonwebtoken";
 import { google } from "googleapis";
@@ -45,7 +45,25 @@ export function logoutUser(req, res) {
 }
 
 //Redirect user to Google's OAuth 2.0 server
+export const googleAuthRedirect = (req, res) => {
+  const state = generateOAuthState();
 
+  //Generate a url that asks permissions
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope,
+    response_type: "code",
+    //Enable incremental authorization.
+    include_granted_scopes: true,
+    //include the state parameter to reduce of Cross-Site Request Forgery attacks
+    state,
+    prompt: "consent",
+  });
+
+  res.redirect(authUrl);
+};
+
+// Handle Google's OAuth callback
 export const googleAuthCallback = async (req, res) => {
   const { code, state } = req.query;
 
