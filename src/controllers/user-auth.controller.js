@@ -2,6 +2,7 @@ import * as AuthService from "../services/user.service.js";
 import { logDebug, logError, logInfo } from "../utils/logger.js";
 import { verifyOAuthState } from "../utils/oauthState.js";
 import { oauth2Client } from "../utils/getGoogleAuth.js";
+import { pool } from "../config/db.js";
 import jwt from "jsonwebtoken";
 import { google } from "googleapis";
 
@@ -70,14 +71,14 @@ export const googleAuthCallback = async (req, res) => {
     const { data: userInfo } = await oauth2.userinfo.get();
 
     // Step 4: Check or create user
-    const existingUser = await query(
+    const existingUser = await pool.query(
       "SELECT id FROM users WHERE email = $1 LIMIT 1",
       [userInfo.email]
     );
 
     let userId;
     if (existingUser.rowCount === 0) {
-      const result = await query(
+      const result = await pool.query(
         "INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id",
         [userInfo.email, userInfo.name, null]
       );
