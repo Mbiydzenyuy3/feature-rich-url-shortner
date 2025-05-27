@@ -17,12 +17,10 @@ export default function ShortenForm({ onShortened }) {
   }
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
-    const { longUrl, customCode, expireInDays } = values
+    const { longUrl } = values
 
     try {
       const requestData = { longUrl }
-      if (customCode) requestData.customCode = customCode
-      if (expireInDays) requestData.expireInDays = parseInt(expireInDays, 10)
 
       const data = await apiFetch('/api/shorten', {
         method: 'POST',
@@ -31,7 +29,7 @@ export default function ShortenForm({ onShortened }) {
 
       setShortenedUrl(data.shortened_URL)
       resetForm()
-      onShortened() // Notify parent
+      onShortened()
     } catch (err) {
       console.error('Error response:', err.response?.data)
       if (err.response?.data?.errors?.length) {
@@ -49,7 +47,7 @@ export default function ShortenForm({ onShortened }) {
   return (
     <div className="form">
       <Formik
-        initialValues={{ longUrl: '', customCode: '', expireInDays: '' }}
+        initialValues={{ longUrl: '' }}
         validate={validate}
         onSubmit={handleSubmit}
       >
