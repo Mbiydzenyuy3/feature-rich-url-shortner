@@ -113,6 +113,11 @@ form {
   gap: 16px;
 }
 
+.google-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .all-urls {
   font-size: 18px;
   font-weight: 700;
@@ -144,7 +149,7 @@ input {
 }
 
 .p-4 {
-  width: 60%;
+  width: 65%;
   display: flex;
   flex-direction: column;
   gap: 16px;

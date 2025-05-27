@@ -1,24 +1,24 @@
 // src/pages/Register.jsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { apiFetch } from "../api.js";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../api.js'
 
 export default function Register() {
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const navigate = useNavigate();
+  const [form, setForm] = useState({ username: '', email: '', password: '' })
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      await apiFetch("/api/auth/register", {
-        method: "POST",
+      await apiFetch('/api/oauth/register', {
+        method: 'POST',
         body: JSON.stringify(form),
-      });
-      navigate("/login");
+      })
+      navigate('/login')
     } catch (err) {
-      alert("Registration failed: " + err.message);
+      alert('Registration failed: ' + err.message)
     }
-  };
+  }
 
   return (
     <div className="form">
@@ -50,5 +50,5 @@ export default function Register() {
         </div>
       </form>
     </div>
-  );
+  )
 }

@@ -1,40 +1,40 @@
 // src/pages/Login.jsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { apiFetch } from "../api.js";
-import Dialog from "../components/Dialoguebox.jsx";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../api.js'
+import Dialog from '../components/Dialoguebox.jsx'
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [showDialog, setShowDialog] = useState(false);
-  const [dialogMessage, setDialogMessage] = useState("");
-  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [showDialog, setShowDialog] = useState(false)
+  const [dialogMessage, setDialogMessage] = useState('')
+  const navigate = useNavigate()
 
   const isFormValid = () => {
-    return form.email?.trim() && form.password?.trim();
-  };
+    return form.email?.trim() && form.password?.trim()
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!isFormValid()) {
-      setDialogMessage("wrong credentials, try again");
-      setShowDialog(true);
-      return;
+      setDialogMessage('wrong credentials, try again')
+      setShowDialog(true)
+      return
     }
 
     try {
-      const res = await apiFetch("/api/auth/login", {
-        method: "POST",
+      const res = await apiFetch('/api/oauth/login', {
+        method: 'POST',
         body: JSON.stringify(form),
-      });
-      localStorage.setItem("token", res.token);
-      navigate("/dashboard");
+      })
+      localStorage.setItem('token', res.token)
+      navigate('/dashboard')
     } catch (err) {
-      setDialogMessage("Registration failed: " + err.message);
-      setShowDialog(true);
+      setDialogMessage('Registration failed: ' + err.message)
+      setShowDialog(true)
     }
-  };
+  }
 
   return (
     <div className="form">
@@ -57,7 +57,11 @@ export default function Login() {
         <button className="cta">Login</button>
         <div
           className="option"
-          style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
         >
           <p>Create an account if haven't yet? </p>
           <a href="/register" className="create-account">
@@ -65,10 +69,15 @@ export default function Login() {
           </a>
           <button
             type="button"
-            className="cta mt-4 bg-white border text-black flex items-center justify-center"
+            className="cta"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
             onClick={() => {
               window.location.href =
-                "https://feature-rich-url-shortner-production.up.railway.app/api/oauth/google";
+                'https://feature-rich-url-shortner-production.up.railway.app/api/oauth/google'
             }}
           >
             <img
@@ -88,5 +97,5 @@ export default function Login() {
         />
       )}
     </div>
-  );
+  )
 }
