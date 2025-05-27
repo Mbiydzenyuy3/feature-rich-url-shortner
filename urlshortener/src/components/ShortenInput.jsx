@@ -1,85 +1,106 @@
-import { useState } from "react";
-import { apiFetch } from "../api.js";
+import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { useState } from 'react'
+import { apiFetch } from '../api.js'
 
 export default function ShortenForm({ onShortened }) {
-  const [longUrl, setLongUrl] = useState("");
-  const [customCode, setCustomCode] = useState("");
-  const [expireInDays, setExpireInDays] = useState("");
-  const [shortenedUrl, setShortenedUrl] = useState("");
-  const [ShowDialog, setShowDialog] = useState(false);
+  const [shortenedUrl, setShortenedUrl] = useState('')
+  const [showDialog, setShowDialog] = useState(false)
 
-  const isValidUrlScheme = (url) => /^https?:\/\//i.test(url.trim());
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!isValidUrlScheme(longUrl)) {
-      setShowDialog(true);
-      return;
+  const validate = (values) => {
+    const errors = {}
+    if (!values.longUrl) {
+      errors.longUrl = 'Required'
+    } else if (!/^https?:\/\//i.test(values.longUrl.trim())) {
+      errors.longUrl = 'URL must start with http:// or https://'
     }
+    return errors
+  }
+
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    const { longUrl, customCode, expireInDays } = values
 
     try {
-      const requestData = { longUrl };
-      if (customCode) requestData.customCode = customCode;
-      if (expireInDays) requestData.expireInDays = parseInt(expireInDays, 10);
+      const requestData = { longUrl }
+      if (customCode) requestData.customCode = customCode
+      if (expireInDays) requestData.expireInDays = parseInt(expireInDays, 10)
 
-      // POST the long URL to be shortened
-      const data = await apiFetch("/api/shorten", {
-        method: "POST",
+      const data = await apiFetch('/api/shorten', {
+        method: 'POST',
         body: JSON.stringify(requestData),
-      });
+      })
 
-      setShortenedUrl(data.shortened_URL);
-      setLongUrl("");
-      setCustomCode("");
-      setExpireInDays("");
-      onShortened(); // Refresh list of URLs
+      setShortenedUrl(data.shortened_URL)
+      resetForm()
+      onShortened() // Notify parent
     } catch (err) {
-      console.error("Error response:", err.response?.data);
+      console.error('Error response:', err.response?.data)
       if (err.response?.data?.errors?.length) {
-        alert("Errors: " + err.response.data.errors.join(", "));
+        alert('Errors: ' + err.response.data.errors.join(', '))
       } else {
         alert(
-          "Shortening failed: " + (err.response?.data?.message || err.message)
-        );
+          'Shortening failed: ' + (err.response?.data?.message || err.message)
+        )
       }
+    } finally {
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="form">
-      <form id="longurl" onSubmit={handleSubmit}>
-        <h3>Paste the URL to be shortened</h3>
-        <div className="input-button">
-          <input
-            className="input-form"
-            type="url"
-            value={longUrl}
-            onChange={(e) => setLongUrl(e.target.value)}
-            placeholder="Enter long URL"
-            required
-          />
-          <button className="submit" type="submit">
-            Shorten
-          </button>
-        </div>
-        <div className="p">
-          <p>
-            Short.ly is a free tool to shorten URLs and generate short links URL{" "}
-            <br /> shortener allows to create a shortened link making it easy to
-            share
-          </p>
-        </div>
+      <Formik
+        initialValues={{ longUrl: '', customCode: '', expireInDays: '' }}
+        validate={validate}
+        onSubmit={handleSubmit}
+      >
+        {({ isSubmitting }) => (
+          <Form id="longurl">
+            <h3>Paste the URL to be shortened</h3>
+            <div className="input-button">
+              <Field
+                className="input-form"
+                type="url"
+                name="longUrl"
+                placeholder="Enter long URL"
+                required
+              />
+              <button className="submit" type="submit" disabled={isSubmitting}>
+                Shorten
+              </button>
+            </div>
+            <ErrorMessage
+              name="longUrl"
+              component="div"
+              style={{ color: 'red', marginTop: '4px' }}
+            />
 
-        {shortenedUrl && (
-          <div>
-            <p>Shortened URL:</p>
-            <a href={shortenedUrl} target="_blank" rel="noopener noreferrer">
-              {shortenedUrl}
-            </a>
-          </div>
+            <div className="p">
+              <p>
+                Short.ly is a free tool to shorten URLs and generate short
+                links.
+                <br />
+                This URL shortener allows you to create a shortened link, making
+                it easy to share.
+              </p>
+            </div>
+
+            {shortenedUrl && (
+              <div>
+                <p>Shortened URL:</p>
+                <a
+                  href={shortenedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {shortenedUrl}
+                </a>
+              </div>
+            )}
+          </Form>
         )}
-      </form>
-      {ShowDialog && (
+      </Formik>
+
+      {showDialog && (
         <Dialog
           title="Invalid URL"
           message="Please include http:// or https:// in your URL."
@@ -87,5 +108,5 @@ export default function ShortenForm({ onShortened }) {
         />
       )}
     </div>
-  );
+  )
 }
