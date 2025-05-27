@@ -33,11 +33,9 @@ export default function ShortenForm({ onShortened }) {
     } catch (err) {
       console.error('Error response:', err.response?.data)
       if (err.response?.data?.errors?.length) {
-        alert('Errors: ' + err.response.data.errors.join(', '))
+        showDialog('Errors: ' + err.response.data.errors.join(', '))
       } else {
-        alert(
-          'Shortening failed: ' + (err.response?.data?.message || err.message)
-        )
+        showDialog('shortening failed')
       }
     } finally {
       setSubmitting(false)
