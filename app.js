@@ -24,8 +24,8 @@ const app = express()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15minutes
-  limit: 100, //limit each IP to 100 requests per `window` (here, per 15minutes)
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 50, //limit each IP to 100 requests per `window` (here, per 15minutes)
   standardHeaders: 'draft-8', // draft-6: `Ratelimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 })
