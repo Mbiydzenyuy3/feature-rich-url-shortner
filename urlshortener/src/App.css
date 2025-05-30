@@ -203,7 +203,13 @@ button.btn.login {
   text-align: center;
 }
 
-@media(min-width: 480px) {}
+@media(min-width: 320px) {
+  .option {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
 
 @media(min-width: 768px) {
   body {

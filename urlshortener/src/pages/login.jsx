@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../api.js'
-import Dialog from '../components/Dialoguebox.jsx'
+import ShowDialogBox from '../components/Dialoguebox.jsx'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -69,11 +69,16 @@ export default function Login() {
           </a>
           <button
             type="button"
-            className="cta"
+            className="button"
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              border: '1px solid gray',
+              backgroundColor: 'transparent',
+              color: 'black',
+              padding: '8px',
+              borderRadius: '24px',
             }}
             onClick={() => {
               window.location.href =
@@ -90,7 +95,7 @@ export default function Login() {
         </div>
       </form>
       {showDialog && (
-        <Dialog
+        <ShowDialogBox
           title="Form Error"
           message={dialogMessage}
           onClose={() => setShowDialog(false)}

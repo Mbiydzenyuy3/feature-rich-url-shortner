@@ -1,19 +1,19 @@
-import React from "react";
+import React from 'react'
 
-export default function ShowDialogue({ title, message, onClose }) {
+export default function ShowDialogBox({ title, message, onClose }) {
   return (
     <>
       <div
         style={{
-          width: "200px",
-          position: "absolute",
-          top: "30%",
-          left: "50%",
-          transform: "translate(-50%, -30%)",
-          background: "white",
-          padding: "20px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+          width: '200px',
+          position: 'absolute',
+          top: '30%',
+          left: '50%',
+          transform: 'translate(-50%, -30%)',
+          background: 'white',
+          padding: '20px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
           zIndex: 1000,
         }}
       >
@@ -22,5 +22,5 @@ export default function ShowDialogue({ title, message, onClose }) {
         <button onClick={onClose}>OK</button>
       </div>
     </>
-  );
+  )
 }
