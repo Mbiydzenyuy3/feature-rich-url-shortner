@@ -12,14 +12,15 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
+  /* height: 100%; */
+  background-color: #fff;
 }
 
 body {
   color: #000;
   background-color: #f5f4f4;
   font-size: 16px;
-  height: 100vh;
+  /* height: 100vh; */
 }
 
 .container {
@@ -194,15 +195,50 @@ button.btn.login {
 .landing-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  height: 100vh;
+  gap: 40px;
   align-items: center;
   justify-content: center;
 }
 
+
+.main-heading {
+  font-size: 2.5rem;
+  margin-top: 40px;
+}
+
+.section-heading {
+  font-size: 2rem;
+  margin: 2rem 0 1rem;
+}
+
+.features-list,
+.how-it-works-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 700px;
+  text-align: center;
+}
+
+.features-list li,
+.how-it-works-list li {
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.why-us-section p {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+
 .footer {
   width: 100%;
   text-align: center;
+  margin-top: 40px;
 }
 
 @media(min-width: 320px) {
@@ -219,7 +255,14 @@ button.btn.login {
     background-color: #fff;
   }
 
-  #root {
-    height: 100vh;
+  .container p {
+    max-width: 700px;
+  }
+
+  .section-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
   }
 }
