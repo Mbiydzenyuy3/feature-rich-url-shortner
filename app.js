@@ -20,6 +20,8 @@ import redirectRouter from './src/routes/redirect.js'
 
 const app = express()
 
+app.set('trust proxy', true)
+
 // Setup __dirname (since ES modules don't have it by default)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
